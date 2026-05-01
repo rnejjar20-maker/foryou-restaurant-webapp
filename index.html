@@ -345,23 +345,107 @@
   </div>
 
   <script>
-    const STORE_KEY = 'for_you_restaurant_demo_v1';
+    const STORE_KEY = 'for_you_restaurant_demo_v2_real_menu';
     const MANAGER_PIN = '1234';
     const DELIVERY_PIN = '2222';
 
     const initialMenu = [
-      {id: 'burger-classic', name: 'Classic Burger', category: 'Burgers', price: 48, prep: '15-20 min', ingredients: ['beef', 'cheese', 'lettuce', 'sauce'], desc: 'Juicy burger with cheese, fresh lettuce, and house sauce.', available: true},
-      {id: 'chicken-tacos', name: 'Chicken Tacos', category: 'Tacos', price: 45, prep: '15-20 min', ingredients: ['chicken', 'fries', 'cheese', 'sauce'], desc: 'Golden tacos filled with chicken, fries, and creamy sauce.', available: true},
-      {id: 'sushi-box', name: 'Mini Sushi Box', category: 'Sushi', price: 65, prep: '20-25 min', ingredients: ['rice', 'salmon', 'avocado', 'nori'], desc: 'A small sushi box for a light but complete meal.', available: true},
-      {id: 'mac-cheese', name: 'Mac n Cheese', category: 'Pasta', price: 42, prep: '12-18 min', ingredients: ['pasta', 'cheese', 'cream'], desc: 'Creamy pasta with melted cheese and a rich sauce.', available: true},
-      {id: 'caesar-salad', name: 'Caesar Salad', category: 'Salads', price: 38, prep: '10-15 min', ingredients: ['lettuce', 'chicken', 'parmesan', 'croutons'], desc: 'Fresh salad for customers looking for something lighter.', available: true},
-      {id: 'for-you-plate', name: 'For You Plate', category: 'Plates', price: 72, prep: '20-30 min', ingredients: ['chicken', 'rice', 'fries', 'sauce'], desc: 'Large plate for hungry customers with sides and sauce.', available: true},
-      {id: 'fries', name: 'Fries', category: 'Sides', price: 15, prep: '5-10 min', ingredients: ['potato', 'salt'], desc: 'Crispy fries, easy to pair with burgers and tacos.', available: true},
-      {id: 'nuggets', name: 'Chicken Nuggets', category: 'Sides', price: 28, prep: '10-12 min', ingredients: ['chicken', 'breadcrumbs'], desc: 'Crispy chicken nuggets with dipping sauce.', available: true},
-      {id: 'mango-juice', name: 'Mango Juice', category: 'Drinks', price: 22, prep: '5 min', ingredients: ['mango', 'water', 'sugar'], desc: 'Fresh mango drink, commonly paired with spicy meals.', available: true},
-      {id: 'cola', name: 'Cola', category: 'Drinks', price: 12, prep: '2 min', ingredients: ['soft drink'], desc: 'Cold soft drink for delivery orders.', available: true},
-      {id: 'cheesecake', name: 'Cheesecake', category: 'Desserts', price: 32, prep: '5 min', ingredients: ['cream cheese', 'biscuit', 'sugar'], desc: 'Sweet dessert to finish the order.', available: true},
-      {id: 'chocolate-cake', name: 'Chocolate Cake', category: 'Desserts', price: 30, prep: '5 min', ingredients: ['chocolate', 'flour', 'cream'], desc: 'Soft chocolate cake slice.', available: true}
+      {id: "frosty-fries", name: "Frosty Fries", category: "Loaded Fries", price: 35, prep: "10-15 min", ingredients: ["fried chicken", "fries", "garlic aioli", "cheese sauce", "bbq", "herbs"], desc: "Fries topped with fried chicken, garlic aioli, cheese sauce, BBQ sauce and herbs.", available: true},
+      {id: "shawarma-fries", name: "Shawarma Fries", category: "Loaded Fries", price: 45, prep: "10-15 min", ingredients: ["shawarma", "fries", "white sauce", "cheese sauce", "herbs", "paprika"], desc: "Fries topped with shawarma, white sauce, cheese sauce, herbs and paprika.", available: true},
+      {id: "korean-fries", name: "Korean Fries", category: "Loaded Fries", price: 45, prep: "10-15 min", ingredients: ["korean chicken", "fries", "cheese sauce", "sesame"], desc: "Fries topped with Korean chicken, cheese sauce and sesame.", available: true},
+      {id: "spicy-volcano-fries", name: "Spicy Volcano Fries", category: "Loaded Fries", price: 65, prep: "12-18 min", ingredients: ["fried chicken", "shawarma", "smoked turkey", "cheese sauce", "fries", "algerian sauce", "bbq", "herbs"], desc: "Loaded fries with fried chicken, shawarma, smoked turkey, cheese sauce, Algerian sauce, BBQ and herbs.", available: true},
+      {id: "tasty-fries", name: "Tasty Fries", category: "Loaded Fries", price: 70, prep: "12-18 min", ingredients: ["fried chicken", "shawarma", "mac n cheese", "fries", "tasty sauce", "herbs", "pickles"], desc: "A very loaded fries option with fried chicken, shawarma, mac n cheese, tasty sauce, herbs and pickles.", available: true},
+      {id: "crunch-fries", name: "Crunch Fries", category: "Loaded Fries", price: 60, prep: "12-18 min", ingredients: ["fried chicken", "potato wedges", "cheese sauce", "for you sauce", "herbs"], desc: "Crispy loaded fries with fried chicken, potato wedges, cheese sauce, For You sauce and herbs.", available: true},
+      {id: "poutine-fried-chicken", name: "Poutine Fried Chicken", category: "Loaded Fries", price: 45, prep: "10-15 min", ingredients: ["fried chicken", "smoked turkey", "fries", "cheese sauce", "mozzarella"], desc: "Poutine-style fries with fried chicken, smoked turkey, cheese sauce and mozzarella.", available: true},
+      {id: "korean-burger", name: "Korean Burger", category: "Premium Sandwiches", price: 45, prep: "15-20 min", ingredients: ["korean fried chicken", "jalapenos", "lettuce", "garlic aioli", "chilli cheese"], desc: "Korean fried chicken burger with jalapenos, lettuce, garlic aioli and chilli cheese.", available: true},
+      {id: "tasty-triple", name: "Tasty Triple", category: "Premium Sandwiches", price: 90, prep: "18-25 min", ingredients: ["triple beef", "triple cheese", "tasty sauce", "caramelized onions", "lettuce"], desc: "Triple beef and triple cheese burger with tasty sauce, caramelized onions and lettuce.", available: true},
+      {id: "mushroom-swiss-burger", name: "Mushroom Swiss Burger", category: "Premium Sandwiches", price: 50, prep: "15-20 min", ingredients: ["beef", "mushrooms", "emmental", "caramelized onions", "burger sauce", "lettuce"], desc: "Beef burger with mushrooms, emmental, caramelized onions, burger sauce and lettuce.", available: true},
+      {id: "rodeo-burger", name: "Rodeo Burger", category: "Premium Sandwiches", price: 75, prep: "18-25 min", ingredients: ["2x beef", "onion rings", "chilli cheese", "caramelized onions", "2x cheddar", "bbq"], desc: "Double beef burger with onion rings, chilli cheese, caramelized onions, double cheddar and BBQ sauce.", available: true},
+      {id: "chicago-burger", name: "Chicago Burger", category: "Premium Sandwiches", price: 55, prep: "15-20 min", ingredients: ["fried chicken", "mozzarella", "smoked turkey", "mushrooms", "caramelized onions", "bbq", "garlic aioli", "lettuce"], desc: "Fried chicken burger with mozzarella, smoked turkey, mushrooms, caramelized onions, BBQ, garlic aioli and lettuce.", available: true},
+      {id: "shawarma", name: "Shawarma", category: "Sandwiches", price: 35, prep: "10-15 min", ingredients: ["shawarma"], desc: "Classic shawarma sandwich.", available: true},
+      {id: "fried-chicken-wrap", name: "Fried Chicken Wrap", category: "Sandwiches", price: 55, prep: "12-18 min", ingredients: ["fried chicken", "wrap"], desc: "Fried chicken wrap.", available: true},
+      {id: "fried-chicken-sandwich", name: "Fried Chicken Sandwich", category: "Sandwiches", price: 45, prep: "12-18 min", ingredients: ["fried chicken", "bread"], desc: "Fried chicken sandwich.", available: true},
+      {id: "burrito-mexicano", name: "Burrito Mexicano", category: "Sandwiches", price: 60, prep: "15-20 min", ingredients: ["burrito", "mexican sauce"], desc: "Mexican-style burrito.", available: true},
+      {id: "chicken-burger", name: "Chicken Burger", category: "Sandwiches", price: 35, prep: "12-18 min", ingredients: ["chicken", "burger bun"], desc: "Chicken burger.", available: true},
+      {id: "cheese-burger", name: "Cheese Burger", category: "Sandwiches", price: 45, prep: "12-18 min", ingredients: ["beef", "cheese", "burger bun"], desc: "Cheese burger.", available: true},
+      {id: "tacos-fried-chicken", name: "Tacos Fried Chicken", category: "Sandwiches", price: 45, prep: "12-18 min", ingredients: ["fried chicken", "tacos"], desc: "Fried chicken tacos.", available: true},
+      {id: "arabian-bites", name: "Arabian Bites", category: "Sandwiches", price: 60, prep: "15-20 min", ingredients: ["arabian bites"], desc: "Arabian bites sandwich option.", available: true},
+      {id: "mac-n-smokey", name: "Mac N Smokey", category: "Loaded Mac", price: 45, prep: "12-18 min", ingredients: ["oven baked mac n cheese", "smoked turkey", "cheese"], desc: "Oven baked mac n cheese with smoked turkey and cheese.", available: true},
+      {id: "mac-n-chicken", name: "Mac N Chicken", category: "Loaded Mac", price: 60, prep: "12-18 min", ingredients: ["mac n cheese", "fried chicken", "cheese", "chives", "crispy onions", "emmental"], desc: "Mac n cheese with fried chicken, cheese, chives, crispy onions and emmental.", available: true},
+      {id: "korean-mac", name: "Korean Mac", category: "Loaded Mac", price: 55, prep: "12-18 min", ingredients: ["mac n cheese", "korean chicken", "garlic aioli", "sesame", "chives"], desc: "Mac n cheese with Korean chicken, garlic aioli, sesame and chives.", available: true},
+      {id: "for-you-combo", name: "For You Combo", category: "Combos", price: 100, prep: "20-30 min", ingredients: ["fried chicken tenders", "onion rings", "chilli cheese", "cheese fingers", "burger bun", "fries", "mac n cheese", "soda", "sundae"], desc: "Combo with fried chicken tenders, onion rings, chilli cheese, cheese fingers, burger bun, fries, mac n cheese, soda and sundae.", available: true},
+      {id: "la-combo", name: "Los Angeles (L.A) Combo", category: "Combos", price: 85, prep: "20-30 min", ingredients: ["slider cheese burger", "slider chicken burger", "fries", "mac n cheese", "soda", "sundae"], desc: "Combo with slider cheese burger, slider chicken burger, fries, mac n cheese, soda and sundae.", available: true},
+      {id: "nashville-chicken-combo", name: "Nashville Chicken Combo", category: "Combos", price: 60, prep: "18-25 min", ingredients: ["spicy chicken", "mac n cheese", "garlic aioli", "burger bun"], desc: "Combo with spicy chicken, mac n cheese, garlic aioli and burger bun.", available: true},
+      {id: "onion-rings", name: "Onion Rings", category: "Sides", price: 35, prep: "8-12 min", ingredients: ["onion rings"], desc: "Crispy onion rings.", available: true},
+      {id: "chilli-cheese", name: "Chilli Cheese", category: "Sides", price: 35, prep: "8-12 min", ingredients: ["chilli cheese"], desc: "Chilli cheese side.", available: true},
+      {id: "cheese-fingers", name: "Cheese Fingers", category: "Sides", price: 35, prep: "8-12 min", ingredients: ["cheese"], desc: "Crispy cheese fingers.", available: true},
+      {id: "fries", name: "Fries", category: "Sides", price: 15, prep: "5-10 min", ingredients: ["potato", "salt"], desc: "Simple fries.", available: true},
+      {id: "mac-n-cheese-side", name: "Mac N Cheese", category: "Sides", price: 25, prep: "8-12 min", ingredients: ["macaroni", "cheese"], desc: "Mac n cheese side.", available: true},
+      {id: "mac-salad", name: "Mac Salad", category: "Sides", price: 25, prep: "5-10 min", ingredients: ["macaroni", "salad"], desc: "Mac salad side.", available: true},
+      {id: "sundae-classic", name: "Sundae Classic", category: "Sundae", price: 25, prep: "5 min", ingredients: ["chocolate", "caramel", "oreo", "kinder", "kitkat", "strawberry"], desc: "Classic sundae with chocolate, caramel, Oreo, Kinder, KitKat or strawberry toppings.", available: true},
+      {id: "sundae-deluxe", name: "Sundae Deluxe", category: "Sundae", price: 45, prep: "5 min", ingredients: ["pistachio", "special"], desc: "Deluxe sundae with pistachio or special topping.", available: true},
+      {id: "fried-sushi-crunchy", name: "Fried Sushi Crunchy", category: "For You Rolls", price: 35, prep: "15-20 min", ingredients: ["fried sushi"], desc: "8 pieces of fried crunchy sushi.", available: true},
+      {id: "sushi-pizza", name: "Sushi Pizza", category: "For You Rolls", price: 40, prep: "15-20 min", ingredients: ["sushi rice", "fish", "cheese"], desc: "Sushi pizza.", available: true},
+      {id: "maki-fry", name: "Maki Fry", category: "For You Rolls", price: 45, prep: "15-20 min", ingredients: ["fried maki"], desc: "Fried maki roll.", available: true},
+      {id: "for-you-fry", name: "For You Fry", category: "For You Rolls", price: 50, prep: "15-20 min", ingredients: ["fried sushi"], desc: "For You fried sushi roll.", available: true},
+      {id: "dragon-eye", name: "Dragon Eye", category: "For You Rolls", price: 45, prep: "15-20 min", ingredients: ["sushi roll"], desc: "Dragon eye sushi roll.", available: true},
+      {id: "alaska-roll", name: "Alaska Roll", category: "For You Rolls", price: 80, prep: "15-20 min", ingredients: ["salmon", "cucumber", "cheese"], desc: "Alaska roll with salmon, cucumber and cheese.", available: true},
+      {id: "malibu-roll", name: "Malibu Roll", category: "For You Rolls", price: 45, prep: "15-20 min", ingredients: ["ebi tempura", "surimi", "cheese"], desc: "Malibu roll with ebi tempura, surimi and cheese.", available: true},
+      {id: "philly-roll", name: "Philly Roll", category: "For You Rolls", price: 75, prep: "15-20 min", ingredients: ["salmon", "chives", "pineapple", "avocado", "cheese"], desc: "Philly roll with salmon, chives, pineapple, avocado and cheese.", available: true},
+      {id: "tokyo-style-sushi-pizza", name: "Tokyo Style Sushi Pizza", category: "For You Rolls", price: 55, prep: "15-20 min", ingredients: ["salmon", "avocado", "surimi", "wakame", "sesame", "kamikaze", "teriyaki", "cheese"], desc: "Sushi pizza with salmon, avocado, surimi, wakame, sesame, kamikaze, teriyaki and cheese.", available: true},
+      {id: "makinsanity-box", name: "Makinsanity Box 16pcs", category: "Boxes", price: 45, prep: "20-30 min", ingredients: ["sushi selection"], desc: "16-piece sushi box.", available: true},
+      {id: "summer-box", name: "Summer Box 20pcs", category: "Boxes", price: 110, prep: "25-35 min", ingredients: ["spring hawaii", "maki fry", "alaska roll"], desc: "20-piece box with Spring Hawaii, Maki Fry and Alaska Roll.", available: true},
+      {id: "for-you-box", name: "For You Box 14pcs", category: "Boxes", price: 75, prep: "20-30 min", ingredients: ["sushi selection"], desc: "14-piece For You sushi box.", available: true},
+      {id: "rainbow-box", name: "Rainbow Box 16pcs", category: "Boxes", price: 100, prep: "20-30 min", ingredients: ["sushi selection"], desc: "16-piece rainbow sushi box.", available: true},
+      {id: "pieces-box-24", name: "24 Pieces Box", category: "Boxes", price: 130, prep: "25-35 min", ingredients: ["sushi selection"], desc: "24-piece sushi box.", available: true},
+      {id: "fried-sushi-box-32", name: "Fried Sushi Box 32pcs", category: "Boxes", price: 145, prep: "30-40 min", ingredients: ["fried sushi selection"], desc: "32-piece fried sushi box.", available: true},
+      {id: "banoffee-pie", name: "Banoffee Pie", category: "Desserts", price: 20, prep: "5 min", ingredients: ["banana", "toffee", "cream"], desc: "Banoffee pie dessert.", available: true},
+      {id: "cheesecup", name: "Cheesecup", category: "Desserts", price: 25, prep: "5 min", ingredients: ["cheese cream"], desc: "Cheesecup dessert.", available: true},
+      {id: "oreo-parfait", name: "Oreo Parfait", category: "Desserts", price: 30, prep: "5 min", ingredients: ["oreo", "cream"], desc: "Oreo parfait dessert.", available: true},
+      {id: "waffle", name: "Waffle", category: "Desserts", price: 35, prep: "8-12 min", ingredients: ["waffle"], desc: "Waffle dessert.", available: true},
+      {id: "spring-saumon", name: "Spring Roll Saumon", category: "Spring Rolls", price: 45, prep: "15-20 min", ingredients: ["salmon", "avocado", "surimi", "cheese"], desc: "6-piece spring roll with salmon, avocado, surimi and cheese.", available: true},
+      {id: "spring-crevette", name: "Spring Roll Crevette", category: "Spring Rolls", price: 40, prep: "15-20 min", ingredients: ["shrimp", "avocado", "surimi", "cheese"], desc: "6-piece spring roll with shrimp, avocado, surimi and cheese.", available: true},
+      {id: "spring-mangue-ebi", name: "Spring Roll Mangue Ebi", category: "Spring Rolls", price: 45, prep: "15-20 min", ingredients: ["shrimp", "surimi", "mango", "cheese", "tobiko"], desc: "6-piece spring roll with shrimp, surimi, mango, cheese and tobiko.", available: true},
+      {id: "spring-hawai", name: "Spring Roll Hawai", category: "Spring Rolls", price: 55, prep: "15-20 min", ingredients: ["salmon", "mango", "surimi", "cheese", "tobiko"], desc: "6-piece spring roll with salmon, mango, surimi, cheese and tobiko.", available: true},
+      {id: "spring-marbella", name: "Spring Roll Marbella", category: "Spring Rolls", price: 55, prep: "15-20 min", ingredients: ["salmon", "shrimp", "surimi", "avocado", "cheese", "tobiko"], desc: "6-piece spring roll with salmon, shrimp, surimi, avocado, cheese and tobiko.", available: true},
+      {id: "california-creme-cheese", name: "California Crème Cheese", category: "Californias", price: 35, prep: "12-18 min", ingredients: ["salmon", "avocado", "surimi", "cheese", "tobiko"], desc: "4-piece California roll with salmon, avocado, surimi, cheese and tobiko.", available: true},
+      {id: "california-classique", name: "California Classique", category: "Californias", price: 30, prep: "12-18 min", ingredients: ["surimi", "cheese", "avocado", "tobiko"], desc: "4-piece California roll with surimi, cheese, avocado and tobiko.", available: true},
+      {id: "california-ebi-fry", name: "California Ebi Fry", category: "Californias", price: 35, prep: "12-18 min", ingredients: ["shrimp", "surimi", "avocado", "cheese", "chives"], desc: "4-piece California roll with shrimp, surimi, avocado, cheese and chives.", available: true},
+      {id: "california-sesame", name: "California Sesame", category: "Californias", price: 35, prep: "12-18 min", ingredients: ["salmon", "cheese", "avocado", "sesame"], desc: "4-piece California roll with salmon, cheese, avocado and sesame.", available: true},
+      {id: "california-ebi-tobiko", name: "California Ebi Tobiko", category: "Californias", price: 40, prep: "12-18 min", ingredients: ["shrimp", "cheese", "avocado", "tobiko"], desc: "4-piece California roll with shrimp, cheese, avocado and tobiko.", available: true},
+      {id: "maxi-saumon-cheese", name: "Maxi Saumon + Cheese", category: "Maxis", price: 25, prep: "10-15 min", ingredients: ["salmon", "cheese"], desc: "6-piece maxi roll with salmon and cheese.", available: true},
+      {id: "maxi-crevette-cheese", name: "Maxi Crevette + Cheese", category: "Maxis", price: 25, prep: "10-15 min", ingredients: ["shrimp", "cheese"], desc: "6-piece maxi roll with shrimp and cheese.", available: true},
+      {id: "maxi-surimi-cheese", name: "Maxi Surimi + Cheese", category: "Maxis", price: 25, prep: "10-15 min", ingredients: ["surimi", "cheese"], desc: "6-piece maxi roll with surimi and cheese.", available: true},
+      {id: "maxi-avocat-cheese", name: "Maxi Avocat + Cheese", category: "Maxis", price: 20, prep: "10-15 min", ingredients: ["avocado", "cheese"], desc: "6-piece maxi roll with avocado and cheese.", available: true},
+      {id: "maxi-concombre-cheese", name: "Maxi Concombre + Cheese", category: "Maxis", price: 20, prep: "10-15 min", ingredients: ["cucumber", "cheese"], desc: "6-piece maxi roll with cucumber and cheese.", available: true},
+      {id: "maxi-saumon-avocat-cheese", name: "Maxi Saumon Avocat Cheese", category: "Maxis", price: 35, prep: "10-15 min", ingredients: ["salmon", "avocado", "cheese"], desc: "6-piece maxi roll with salmon, avocado and cheese.", available: true},
+      {id: "futomaki-saumon", name: "Futomaki Saumon", category: "Futomakis", price: 45, prep: "12-18 min", ingredients: ["salmon"], desc: "6-piece futomaki with salmon.", available: true},
+      {id: "futomaki-crevette", name: "Futomaki Crevette", category: "Futomakis", price: 40, prep: "12-18 min", ingredients: ["shrimp"], desc: "6-piece futomaki with shrimp.", available: true},
+      {id: "futomaki-surimi", name: "Futomaki Surimi", category: "Futomakis", price: 40, prep: "12-18 min", ingredients: ["surimi"], desc: "6-piece futomaki with surimi.", available: true},
+      {id: "sushi-burrito-classic", name: "Sushi Burrito Classic", category: "Sushi Burrito", price: 55, prep: "15-20 min", ingredients: ["rice", "salmon", "goma wakame", "avocado", "surimi", "pineapple", "mango", "cream cheese"], desc: "Sushi burrito with rice, salmon, goma wakame, avocado, surimi, pineapple or mango, and cream cheese.", available: true},
+      {id: "sushi-burrito-gambas", name: "Sushi Burrito Gambas", category: "Sushi Burrito", price: 50, prep: "15-20 min", ingredients: ["rice", "breaded shrimp", "avocado", "surimi", "tobiko", "cream cheese"], desc: "Sushi burrito with rice, breaded shrimp, avocado, surimi, tobiko and cream cheese.", available: true},
+      {id: "sushi-burrito-cesar", name: "Sushi Burrito César", category: "Sushi Burrito", price: 55, prep: "15-20 min", ingredients: ["rice", "breaded shrimp", "fried chicken", "pineapple", "mango", "goma wakame", "cheese"], desc: "Sushi burrito with rice, breaded shrimp, fried chicken, pineapple or mango, goma wakame and cheese.", available: true},
+      {id: "chirashi-classic", name: "Chirashi Classic", category: "Bowls", price: 55, prep: "12-18 min", ingredients: ["salmon", "surimi", "avocado", "rice"], desc: "Chirashi bowl with salmon, surimi, avocado and rice.", available: true},
+      {id: "chirashi-mixed", name: "Chirashi Mixed", category: "Bowls", price: 60, prep: "12-18 min", ingredients: ["salmon", "shrimp", "surimi", "avocado", "rice"], desc: "Chirashi bowl with salmon, shrimp, surimi, avocado and rice.", available: true},
+      {id: "poke-bowl", name: "Poke Bowl", category: "Bowls", price: 80, prep: "15-20 min", ingredients: ["salmon", "avocado", "rice", "mango", "shrimp", "fried chicken", "sesame", "wakame", "cucumber"], desc: "Poke bowl with salmon, avocado, rice, mango, shrimp, fried chicken, sesame, wakame and cucumber.", available: true},
+      {id: "milkshake", name: "Milkshake", category: "Drinks + Coffee", price: 35, prep: "5 min", ingredients: ["milk", "ice cream"], desc: "Milkshake.", available: true},
+      {id: "pina-colada-shake", name: "Pina Colada Shake", category: "Drinks + Coffee", price: 40, prep: "5 min", ingredients: ["pineapple", "coconut"], desc: "Pina colada shake.", available: true},
+      {id: "mojito", name: "Mojito", category: "Drinks + Coffee", price: 25, prep: "5 min", ingredients: ["mint", "lemon"], desc: "Mojito drink.", available: true},
+      {id: "tropical-fizz", name: "Tropical Fizz", category: "Drinks + Coffee", price: 30, prep: "5 min", ingredients: ["tropical fruits", "sparkling drink"], desc: "Tropical fizz drink.", available: true},
+      {id: "pineapple-fizz", name: "Pineapple Fizz", category: "Drinks + Coffee", price: 25, prep: "5 min", ingredients: ["pineapple", "sparkling drink"], desc: "Pineapple fizz drink.", available: true},
+      {id: "sweet-fusion-smoothie", name: "Sweet Fusion Smoothie", category: "Drinks + Coffee", price: 35, prep: "5 min", ingredients: ["fruits"], desc: "Sweet fusion smoothie.", available: true},
+      {id: "espresso", name: "Espresso", category: "Drinks + Coffee", price: 15, prep: "3 min", ingredients: ["coffee"], desc: "Espresso coffee.", available: true},
+      {id: "latte", name: "Latte", category: "Drinks + Coffee", price: 20, prep: "3 min", ingredients: ["coffee", "milk"], desc: "Latte coffee.", available: true},
+      {id: "americano", name: "Americano", category: "Drinks + Coffee", price: 20, prep: "3 min", ingredients: ["coffee", "water"], desc: "Americano coffee.", available: true},
+      {id: "mini-tea", name: "Mini Tea", category: "Drinks + Coffee", price: 20, prep: "3 min", ingredients: ["tea"], desc: "Mini tea.", available: true},
+      {id: "iced-latte", name: "Iced Latte", category: "Drinks + Coffee", price: 25, prep: "5 min", ingredients: ["coffee", "milk", "ice"], desc: "Iced latte.", available: true},
+      {id: "iced-macchiato", name: "Iced Macchiato", category: "Drinks + Coffee", price: 30, prep: "5 min", ingredients: ["coffee", "milk", "ice"], desc: "Iced macchiato.", available: true},
+      {id: "soda", name: "Soda", category: "Drinks + Coffee", price: 10, prep: "2 min", ingredients: ["soft drink"], desc: "Soda.", available: true},
+      {id: "special-soda", name: "Special Soda", category: "Drinks + Coffee", price: 25, prep: "5 min", ingredients: ["soft drink", "flavor"], desc: "Special soda.", available: true},
+      {id: "glass-soda", name: "Glass Soda", category: "Drinks + Coffee", price: 35, prep: "5 min", ingredients: ["soft drink", "flavor"], desc: "Glass soda.", available: true},
+      {id: "juice", name: "Juice", category: "Drinks + Coffee", price: 20, prep: "5 min", ingredients: ["fruit"], desc: "Juice.", available: true},
+      {id: "panache", name: "Panache", category: "Drinks + Coffee", price: 25, prep: "5 min", ingredients: ["mixed fruits"], desc: "Panache drink.", available: true},
+      {id: "water", name: "Water", category: "Drinks + Coffee", price: 5, prep: "1 min", ingredients: ["water"], desc: "Water.", available: true}
     ];
 
     const deliveryPeople = [
@@ -392,13 +476,13 @@
             id: 'FY-1001', createdAt: new Date(Date.now() - 1000 * 60 * 42).toISOString(), status: 'Accepted',
             customer: {name: 'Sample Customer', phone: '0612-000-111', address: 'AUI Campus, Ifrane', instructions: 'Call when outside'},
             payment: 'Cash', deliveryId: 'd1',
-            items: [{id: 'chicken-tacos', name: 'Chicken Tacos', price: 45, qty: 2}, {id: 'mango-juice', name: 'Mango Juice', price: 22, qty: 1}], total: 112
+            items: [{id: 'korean-burger', name: 'Korean Burger', price: 45, qty: 2}, {id: 'soda', name: 'Soda', price: 10, qty: 1}], total: 100
           },
           {
             id: 'FY-1002', createdAt: new Date(Date.now() - 1000 * 60 * 18).toISOString(), status: 'Order received',
             customer: {name: 'Test Order', phone: '0600-222-333', address: 'Downtown Ifrane', instructions: ''},
             payment: 'Card at delivery', deliveryId: '',
-            items: [{id: 'burger-classic', name: 'Classic Burger', price: 48, qty: 1}, {id: 'fries', name: 'Fries', price: 15, qty: 1}], total: 63
+            items: [{id: 'shawarma-fries', name: 'Shawarma Fries', price: 45, qty: 1}, {id: 'fries', name: 'Fries', price: 15, qty: 1}], total: 60
           }
         ],
         deliveryPeople,
@@ -654,7 +738,7 @@
         <div class="card">
           <div id="chatBox" class="chat-box">${state.chat.map(m => `<div class="msg ${m.from === 'user' ? 'user-msg' : 'bot-msg'}">${m.text}</div>`).join('')}</div>
           <div class="row" style="margin-bottom:10px">
-            ${['I want something light', 'I am very hungry', 'I want a drink', 'No cheese please'].map(p => `<button class="secondary" onclick="quickPrompt('${p}')">${p}</button>`).join('')}
+            ${['I want something light', 'I am very hungry', 'I want sushi', 'I want something spicy', 'I want a drink', 'No cheese please'].map(p => `<button class="secondary" onclick="quickPrompt('${p}')">${p}</button>`).join('')}
           </div>
           <div class="row"><input id="chatInput" class="input" placeholder="Type your request..." onkeydown="if(event.key==='Enter') sendChat()" /><button class="primary" onclick="sendChat()">Send</button></div>
         </div>
@@ -676,12 +760,13 @@
     function assistantReply(text) {
       const t = text.toLowerCase();
       let picks = [];
-      if (t.includes('light') || t.includes('calorie') || t.includes('healthy')) picks = state.menu.filter(x => ['Salads', 'Sushi'].includes(x.category));
-      else if (t.includes('hungry') || t.includes('big') || t.includes('full')) picks = state.menu.filter(x => ['Plates', 'Burgers', 'Pasta'].includes(x.category));
-      else if (t.includes('drink') || t.includes('juice')) picks = state.menu.filter(x => x.category === 'Drinks');
-      else if (t.includes('dessert') || t.includes('sweet')) picks = state.menu.filter(x => x.category === 'Desserts');
-      else if (t.includes('cheese')) picks = state.menu.filter(x => !x.ingredients.includes('cheese'));
-      else if (t.includes('spicy')) picks = state.menu.filter(x => ['Tacos', 'Burgers'].includes(x.category));
+      if (t.includes('light') || t.includes('calorie') || t.includes('healthy')) picks = state.menu.filter(x => ['For You Rolls', 'Spring Rolls', 'Californias', 'Bowls', 'Sushi Burrito'].includes(x.category));
+      else if (t.includes('hungry') || t.includes('big') || t.includes('full')) picks = state.menu.filter(x => ['Combos', 'Premium Sandwiches', 'Loaded Fries', 'Loaded Mac'].includes(x.category));
+      else if (t.includes('sushi') || t.includes('roll')) picks = state.menu.filter(x => ['For You Rolls', 'Spring Rolls', 'Californias', 'Maxis', 'Futomakis', 'Sushi Burrito', 'Bowls', 'Boxes'].includes(x.category));
+      else if (t.includes('drink') || t.includes('juice') || t.includes('coffee') || t.includes('latte')) picks = state.menu.filter(x => x.category === 'Drinks + Coffee');
+      else if (t.includes('dessert') || t.includes('sweet') || t.includes('sundae')) picks = state.menu.filter(x => ['Desserts', 'Sundae'].includes(x.category));
+      else if (t.includes('cheese')) picks = state.menu.filter(x => !x.ingredients.some(i => i.toLowerCase().includes('cheese')));
+      else if (t.includes('spicy') || t.includes('korean') || t.includes('volcano') || t.includes('nashville')) picks = state.menu.filter(x => ['Korean Burger', 'Korean Fries', 'Korean Mac', 'Spicy Volcano Fries', 'Nashville Chicken Combo', 'Tacos Fried Chicken'].includes(x.name));
       else picks = state.menu.filter(x => x.available).slice(0, 3);
       picks = picks.filter(x => x.available).slice(0, 3);
       if (!picks.length) return 'I could not find an available match. Please check the menu or ask for another type of meal.';
