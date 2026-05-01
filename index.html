@@ -413,6 +413,7 @@
     let managerLoggedIn = false;
     let deliveryLoggedIn = false;
     let deliveryPersonId = 'd1';
+    let deliveryTab = 'orders';
     let managerTab = 'orders';
     let menuFilter = 'All';
     let searchText = '';
@@ -840,7 +841,7 @@
     }
 
     
-    function renderDelivery() {
+function renderDelivery() {
       if (!deliveryLoggedIn) {
         byId('delivery').innerHTML = loginHtml('Delivery Login', 'Use PIN 2222 for the demo.', 'deliveryPin', 'loginDelivery()');
         return;
@@ -866,7 +867,7 @@
     }
 
     function loginDelivery() {
-      if (byId('deliveryPin').value === DELIVERY_PIN) { deliveryLoggedIn = true; renderDelivery(); }
+      if (byId('deliveryPin').value === DELIVERY_PIN) { deliveryLoggedIn = true; deliveryTab = 'orders'; renderDelivery(); }
       else alert('Wrong PIN. Use 2222 for the demo.');
     }
 
@@ -891,7 +892,6 @@
 
     function deliveryOrderCard(o) {
       const delivered = o.status === 'Delivered';
-      const pending = o.status === 'Order received' || o.status === 'Accepted';
       const inTransit = o.status === 'Out for delivery';
       const statusLabel = delivered ? 'Delivered' : inTransit ? 'In Transit' : 'Pending';
       const pillClass = delivered ? 'delivered' : inTransit ? 'dark' : 'pending';
@@ -961,10 +961,10 @@
         const now = new Date();
         const iso = d => d.toISOString().slice(0,10);
         state.deliveryShifts = [
-          {id:'s1', driverId:'d1', date:iso(new Date(now.getFullYear(), now.getMonth(), 3)), start:'12:00', end:'16:00'},
-          {id:'s2', driverId:'d1', date:iso(new Date(now.getFullYear(), now.getMonth(), 10)), start:'18:00', end:'22:00'},
-          {id:'s3', driverId:'d1', date:iso(new Date(now.getFullYear(), now.getMonth(), 15)), start:'13:00', end:'18:00'},
-          {id:'s4', driverId:'d1', date:iso(new Date(now.getFullYear(), now.getMonth(), 24)), start:'19:00', end:'23:00'}
+          {id:'s1',driverId:'d1',date:iso(new Date(now.getFullYear(), now.getMonth(), 3)),start:'12:00',end:'16:00'},
+          {id:'s2',driverId:'d1',date:iso(new Date(now.getFullYear(), now.getMonth(), 10)),start:'18:00',end:'22:00'},
+          {id:'s3',driverId:'d1',date:iso(new Date(now.getFullYear(), now.getMonth(), 15)),start:'13:00',end:'18:00'},
+          {id:'s4',driverId:'d1',date:iso(new Date(now.getFullYear(), now.getMonth(), 24)),start:'19:00',end:'23:00'}
         ];
         saveState();
       }
@@ -1017,7 +1017,7 @@
 
     function shiftHours(s) {
       const [sh,sm] = s.start.split(':').map(Number), [eh,em] = s.end.split(':').map(Number);
-      return Math.max(0, Math.round(((eh*60+em) - (sh*60+sm))/60));
+      return Math.max(0, Math.round(((eh*60+em)-(sh*60+sm))/60));
     }
 
     function calendarHtml(shifts) {
@@ -1040,7 +1040,7 @@
       if (!date) return;
       const start = prompt('Start time? Example: 12:00','12:00') || '12:00';
       const end = prompt('End time? Example: 16:00','16:00') || '16:00';
-      state.deliveryShifts.push({id:'s'+Date.now(), driverId:deliveryPersonId, date, start, end});
+      state.deliveryShifts.push({id:'s'+Date.now(),driverId:deliveryPersonId,date,start,end});
       saveState();
       renderDelivery();
     }
@@ -1053,13 +1053,12 @@
 
     function toggleDeliveryAvailability(id) {
       const d = state.deliveryPeople.find(x => x.id === id);
-      if (!d) return;
       d.available = !d.available;
       saveState();
       renderAll();
     }
 
-function timeAgo(dateString) {
+    function timeAgo(dateString) {
       const mins = Math.max(0, Math.round((Date.now() - new Date(dateString).getTime()) / 60000));
       if (mins < 1) return 'just now';
       if (mins < 60) return `${mins} min ago`;
