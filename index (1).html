@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>For You Restaurant Web App</title>
+  <style>
+    :root {
+      --bg: #fff8ef;
+      --card: #ffffff;
+      --dark: #23170f;
+      --muted: #6e6258;
+      --accent: #c85a24;
+      --accent2: #f3b35b;
+      --green: #26805f;
+      --red: #b63b3b;
+      --line: #ead8c6;
+      --soft: #fff0db;
+      --shadow: 0 12px 30px rgba(78, 45, 20, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--dark);
+    }
+
+    button, input, select, textarea {
+      font-family: inherit;
+      font-size: 15px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 12px;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .primary { background: var(--accent); color: white; }
+    .secondary { background: var(--soft); color: var(--dark); border: 1px solid var(--line); }
+    .danger { background: var(--red); color: white; }
+    .success { background: var(--green); color: white; }
+    .ghost { background: transparent; border: 1px solid var(--line); color: var(--dark); }
+    .disabled { opacity: 0.45; pointer-events: none; }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      background: rgba(255, 248, 239, 0.96);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(10px);
+    }
+
+    .topbar {
+      max-width: 1180px;
+      margin: auto;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 900;
+      font-size: 20px;
+      letter-spacing: -0.5px;
+    }
+
+    .logo {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: var(--dark);
+      color: var(--accent2);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    nav {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    nav button {
+      background: white;
+      border: 1px solid var(--line);
+      padding: 8px 10px;
+    }
+
+    nav button.active {
+      background: var(--dark);
+      color: white;
+      border-color: var(--dark);
+    }
+
+    main {
+      max-width: 1180px;
+      margin: auto;
+      padding: 22px 18px 60px;
+    }
+
+    .section { display: none; }
+    .section.active { display: block; }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 24px;
+      align-items: stretch;
+      margin-top: 10px;
+    }
+
+    .hero-card, .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .hero-card {
+      padding: 34px;
+      background: linear-gradient(135deg, white, #fff0db);
+    }
+
+    h1 { font-size: 44px; margin: 0 0 12px; line-height: 1.05; }
+    h2 { font-size: 28px; margin: 0 0 16px; }
+    h3 { margin: 0 0 10px; }
+    p { color: var(--muted); line-height: 1.5; }
+
+    .hero-actions, .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+    .hero-side {
+      padding: 22px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .stat-box {
+      background: var(--soft);
+      border: 1px solid var(--line);
+      padding: 16px;
+      border-radius: 18px;
+    }
+    .stat-value { font-size: 24px; font-weight: 900; }
+    .stat-label { color: var(--muted); font-size: 13px; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .card { padding: 18px; }
+    .dish-card { display: flex; flex-direction: column; gap: 10px; }
+    .dish-img {
+      height: 120px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #442315, #f3b35b);
+      display: flex;
+      align-items: end;
+      padding: 12px;
+      color: white;
+      font-weight: 900;
+    }
+    .dish-meta { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .price { font-weight: 900; color: var(--accent); }
+    .tag { font-size: 12px; padding: 5px 8px; border-radius: 999px; background: var(--soft); color: var(--muted); border: 1px solid var(--line); }
+    .tag.green { background: #e9fff6; color: var(--green); border-color: #bcecd7; }
+    .tag.red { background: #fff0f0; color: var(--red); border-color: #f0c5c5; }
+    .tag.dark { background: var(--dark); color: white; }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      margin: 14px 0 18px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .input, textarea, select {
+      width: 100%;
+      padding: 12px 13px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: white;
+      outline: none;
+    }
+
+    .toolbar .input { max-width: 330px; }
+
+    .category-btn.active { background: var(--dark); color: white; }
+
+    .cart-line, .order-line, .staff-line, .mini-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--line);
+      align-items: center;
+    }
+
+    .cart-line:last-child, .order-line:last-child, .staff-line:last-child, .mini-line:last-child { border-bottom: 0; }
+
+    .qty { display: flex; align-items: center; gap: 8px; }
+    .qty button { padding: 6px 10px; }
+
+    .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .full { grid-column: 1 / -1; }
+
+    .status-steps { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 18px 0; }
+    .step {
+      border: 1px solid var(--line);
+      background: white;
+      border-radius: 14px;
+      padding: 12px 8px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .step.done { background: var(--dark); color: white; border-color: var(--dark); }
+    .step.cancelled { background: var(--red); color: white; border-color: var(--red); }
+
+    .login-box { max-width: 420px; margin: 30px auto; }
+    .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+    .tabs button.active { background: var(--accent); color: white; }
+
+    .order-card {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 14px;
+      background: white;
+      display: grid;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .order-head { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+    .order-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 20;
+      padding: 20px;
+      overflow: auto;
+    }
+    .modal-backdrop.show { display: grid; place-items: center; }
+    .modal {
+      width: min(620px, 100%);
+      background: white;
+      border-radius: 22px;
+      padding: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+
+    .chat-box {
+      height: 360px;
+      overflow: auto;
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+    .msg { padding: 10px 12px; border-radius: 14px; margin: 8px 0; max-width: 85%; }
+    .user-msg { margin-left: auto; background: var(--dark); color: white; }
+    .bot-msg { background: var(--soft); border: 1px solid var(--line); }
+
+    .notice {
+      background: #fff3cd;
+      border: 1px solid #f1d58b;
+      color: #6a4a00;
+      padding: 12px 14px;
+      border-radius: 14px;
+      margin-bottom: 14px;
+    }
+
+    .footer-note {
+      margin-top: 28px;
+      padding-top: 18px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    @media (max-width: 850px) {
+      .hero, .grid-2 { grid-template-columns: 1fr; }
+      .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      h1 { font-size: 34px; }
+      .topbar { align-items: flex-start; flex-direction: column; }
+      nav { justify-content: flex-start; }
+      .status-steps { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 560px) {
+      .grid { grid-template-columns: 1fr; }
+      .form-grid { grid-template-columns: 1fr; }
+      .hero-card { padding: 22px; }
+      .cart-line, .order-line, .staff-line { align-items: flex-start; flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="topbar">
+      <div class="brand"><div class="logo">FY</div><span>For You Restaurant</span></div>
+      <nav id="nav"></nav>
+    </div>
+  </header>
+
+  <main>
+    <section id="home" class="section active"></section>
+    <section id="menu" class="section"></section>
+    <section id="cart" class="section"></section>
+    <section id="track" class="section"></section>
+    <section id="assistant" class="section"></section>
+    <section id="manager" class="section"></section>
+    <section id="delivery" class="section"></section>
+    <div class="footer-note">Academic beta prototype for System Analysis and Design. Data is stored locally in this browser for demonstration.</div>
+  </main>
+
+  <div id="modalBackdrop" class="modal-backdrop">
+    <div id="modal" class="modal"></div>
+  </div>
+
+  <script>
+    const STORE_KEY = 'for_you_restaurant_demo_v1';
+    const MANAGER_PIN = '1234';
+    const DELIVERY_PIN = '2222';
+
+    const initialMenu = [
+      {id: 'burger-classic', name: 'Classic Burger', category: 'Burgers', price: 48, prep: '15-20 min', ingredients: ['beef', 'cheese', 'lettuce', 'sauce'], desc: 'Juicy burger with cheese, fresh lettuce, and house sauce.', available: true},
+      {id: 'chicken-tacos', name: 'Chicken Tacos', category: 'Tacos', price: 45, prep: '15-20 min', ingredients: ['chicken', 'fries', 'cheese', 'sauce'], desc: 'Golden tacos filled with chicken, fries, and creamy sauce.', available: true},
+      {id: 'sushi-box', name: 'Mini Sushi Box', category: 'Sushi', price: 65, prep: '20-25 min', ingredients: ['rice', 'salmon', 'avocado', 'nori'], desc: 'A small sushi box for a light but complete meal.', available: true},
+      {id: 'mac-cheese', name: 'Mac n Cheese', category: 'Pasta', price: 42, prep: '12-18 min', ingredients: ['pasta', 'cheese', 'cream'], desc: 'Creamy pasta with melted cheese and a rich sauce.', available: true},
+      {id: 'caesar-salad', name: 'Caesar Salad', category: 'Salads', price: 38, prep: '10-15 min', ingredients: ['lettuce', 'chicken', 'parmesan', 'croutons'], desc: 'Fresh salad for customers looking for something lighter.', available: true},
+      {id: 'for-you-plate', name: 'For You Plate', category: 'Plates', price: 72, prep: '20-30 min', ingredients: ['chicken', 'rice', 'fries', 'sauce'], desc: 'Large plate for hungry customers with sides and sauce.', available: true},
+      {id: 'fries', name: 'Fries', category: 'Sides', price: 15, prep: '5-10 min', ingredients: ['potato', 'salt'], desc: 'Crispy fries, easy to pair with burgers and tacos.', available: true},
+      {id: 'nuggets', name: 'Chicken Nuggets', category: 'Sides', price: 28, prep: '10-12 min', ingredients: ['chicken', 'breadcrumbs'], desc: 'Crispy chicken nuggets with dipping sauce.', available: true},
+      {id: 'mango-juice', name: 'Mango Juice', category: 'Drinks', price: 22, prep: '5 min', ingredients: ['mango', 'water', 'sugar'], desc: 'Fresh mango drink, commonly paired with spicy meals.', available: true},
+      {id: 'cola', name: 'Cola', category: 'Drinks', price: 12, prep: '2 min', ingredients: ['soft drink'], desc: 'Cold soft drink for delivery orders.', available: true},
+      {id: 'cheesecake', name: 'Cheesecake', category: 'Desserts', price: 32, prep: '5 min', ingredients: ['cream cheese', 'biscuit', 'sugar'], desc: 'Sweet dessert to finish the order.', available: true},
+      {id: 'chocolate-cake', name: 'Chocolate Cake', category: 'Desserts', price: 30, prep: '5 min', ingredients: ['chocolate', 'flour', 'cream'], desc: 'Soft chocolate cake slice.', available: true}
+    ];
+
+    const deliveryPeople = [
+      {id: 'd1', name: 'Yassine', phone: '0600-111-222', available: true},
+      {id: 'd2', name: 'Imad', phone: '0600-333-444', available: true},
+      {id: 'd3', name: 'Omar', phone: '0600-555-666', available: false}
+    ];
+
+    const statusOrder = ['Order received', 'Accepted', 'Preparing', 'Out for delivery', 'Delivered'];
+
+    let state = loadState();
+    let currentPage = 'home';
+    let managerLoggedIn = false;
+    let deliveryLoggedIn = false;
+    let deliveryPersonId = 'd1';
+    let managerTab = 'orders';
+    let menuFilter = 'All';
+    let searchText = '';
+
+    function loadState() {
+      const saved = localStorage.getItem(STORE_KEY);
+      if (saved) return JSON.parse(saved);
+      const seed = {
+        menu: initialMenu,
+        cart: {},
+        orders: [
+          {
+            id: 'FY-1001', createdAt: new Date(Date.now() - 1000 * 60 * 42).toISOString(), status: 'Accepted',
+            customer: {name: 'Sample Customer', phone: '0612-000-111', address: 'AUI Campus, Ifrane', instructions: 'Call when outside'},
+            payment: 'Cash', deliveryId: 'd1',
+            items: [{id: 'chicken-tacos', name: 'Chicken Tacos', price: 45, qty: 2}, {id: 'mango-juice', name: 'Mango Juice', price: 22, qty: 1}], total: 112
+          },
+          {
+            id: 'FY-1002', createdAt: new Date(Date.now() - 1000 * 60 * 18).toISOString(), status: 'Order received',
+            customer: {name: 'Test Order', phone: '0600-222-333', address: 'Downtown Ifrane', instructions: ''},
+            payment: 'Card at delivery', deliveryId: '',
+            items: [{id: 'burger-classic', name: 'Classic Burger', price: 48, qty: 1}, {id: 'fries', name: 'Fries', price: 15, qty: 1}], total: 63
+          }
+        ],
+        deliveryPeople,
+        lastOrderId: 'FY-1002',
+        chat: [{from: 'bot', text: 'Hi. Tell me what you feel like eating: light, very hungry, spicy, drink, dessert, or no cheese.'}]
+      };
+      localStorage.setItem(STORE_KEY, JSON.stringify(seed));
+      return seed;
+    }
+
+    function saveState() { localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
+    function money(n) { return `${n} MAD`; }
+    function byId(id) { return document.getElementById(id); }
+    function getMenuItem(id) { return state.menu.find(x => x.id === id); }
+    function getDeliveryName(id) { const d = state.deliveryPeople.find(x => x.id === id); return d ? d.name : 'Not assigned'; }
+
+    function navItems() {
+      return [
+        ['home', 'Home'], ['menu', 'Menu'], ['cart', `Cart (${cartCount()})`], ['track', 'Track Order'],
+        ['assistant', 'AI Assistant'], ['manager', 'Manager'], ['delivery', 'Delivery']
+      ];
+    }
+
+    function renderNav() {
+      byId('nav').innerHTML = navItems().map(([id, label]) =>
+        `<button class="${currentPage === id ? 'active' : ''}" onclick="go('${id}')">${label}</button>`
+      ).join('');
+    }
+
+    function go(page) {
+      currentPage = page;
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      byId(page).classList.add('active');
+      renderAll();
+      window.scrollTo({top: 0, behavior: 'smooth'});
+    }
+
+    function renderAll() {
+      renderNav();
+      renderHome();
+      renderMenu();
+      renderCart();
+      renderTrack();
+      renderAssistant();
+      renderManager();
+      renderDelivery();
+    }
+
+    function cartCount() { return Object.values(state.cart).reduce((sum, q) => sum + q, 0); }
+    function cartItems() {
+      return Object.entries(state.cart).map(([id, qty]) => ({...getMenuItem(id), qty})).filter(x => x.id);
+    }
+    function cartTotal() { return cartItems().reduce((sum, x) => sum + x.price * x.qty, 0); }
+
+    function renderHome() {
+      const delivered = state.orders.filter(o => o.status === 'Delivered').length;
+      byId('home').innerHTML = `
+        <div class="hero">
+          <div class="hero-card">
+            <span class="tag dark">Mobile-friendly ordering system</span>
+            <h1>Order from For You without waiting on the phone.</h1>
+            <p>This academic prototype digitizes menu browsing, checkout, order tracking, manager order control, delivery assignment, and basic analytics.</p>
+            <div class="hero-actions">
+              <button class="primary" onclick="go('menu')">Order Now</button>
+              <button class="secondary" onclick="go('assistant')">Ask the Assistant</button>
+              <button class="ghost" onclick="go('manager')">Manager Dashboard</button>
+            </div>
+          </div>
+          <div class="hero-side card">
+            <div class="stat-box"><div class="stat-value">${state.menu.length}</div><div class="stat-label">Menu items</div></div>
+            <div class="stat-box"><div class="stat-value">${state.orders.length}</div><div class="stat-label">Orders in demo system</div></div>
+            <div class="stat-box"><div class="stat-value">${delivered}</div><div class="stat-label">Delivered orders</div></div>
+          </div>
+        </div>
+        <h2 style="margin-top:28px">Featured dishes</h2>
+        <div class="grid">${state.menu.slice(0, 6).map(dishCard).join('')}</div>
+      `;
+    }
+
+    function renderMenu() {
+      const categories = ['All', ...new Set(state.menu.map(x => x.category))];
+      const items = state.menu.filter(item =>
+        (menuFilter === 'All' || item.category === menuFilter) &&
+        (item.name.toLowerCase().includes(searchText.toLowerCase()) || item.desc.toLowerCase().includes(searchText.toLowerCase()))
+      );
+      byId('menu').innerHTML = `
+        <h2>Our Menu</h2>
+        <p>Browse dishes, check details, and add available items to the cart.</p>
+        <div class="toolbar">
+          <input class="input" placeholder="Search for burgers, sushi, drinks..." value="${escapeHtml(searchText)}" oninput="searchText=this.value; renderMenu()" />
+          ${categories.map(c => `<button class="category-btn secondary ${menuFilter === c ? 'active' : ''}" onclick="menuFilter='${c}'; renderMenu()">${c}</button>`).join('')}
+        </div>
+        <div class="grid">${items.map(dishCard).join('')}</div>
+      `;
+    }
+
+    function dishCard(item) {
+      const unavailable = !item.available;
+      return `
+        <div class="card dish-card">
+          <div class="dish-img">${item.category}</div>
+          <div class="dish-meta"><h3>${item.name}</h3><span class="price">${money(item.price)}</span></div>
+          <div class="row"><span class="tag">${item.prep}</span><span class="tag ${item.available ? 'green' : 'red'}">${item.available ? 'Available' : 'Unavailable'}</span></div>
+          <p>${item.desc}</p>
+          <div class="row">
+            <button class="secondary" onclick="openItem('${item.id}')">View Details</button>
+            <button class="primary ${unavailable ? 'disabled' : ''}" onclick="addToCart('${item.id}')">Add to Cart</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function openItem(id) {
+      const item = getMenuItem(id);
+      showModal(`
+        <h2>${item.name}</h2>
+        <p>${item.desc}</p>
+        <div class="mini-line"><strong>Price</strong><span>${money(item.price)}</span></div>
+        <div class="mini-line"><strong>Preparation time</strong><span>${item.prep}</span></div>
+        <div class="mini-line"><strong>Ingredients</strong><span>${item.ingredients.join(', ')}</span></div>
+        <div class="mini-line"><strong>Availability</strong><span>${item.available ? 'Available' : 'Unavailable'}</span></div>
+        <div class="row" style="margin-top:16px">
+          <button class="primary ${item.available ? '' : 'disabled'}" onclick="addToCart('${item.id}'); closeModal()">Add to Cart</button>
+          <button class="secondary" onclick="closeModal()">Close</button>
+        </div>
+      `);
+    }
+
+    function addToCart(id) {
+      const item = getMenuItem(id);
+      if (!item || !item.available) return alert('This item is currently unavailable.');
+      state.cart[id] = (state.cart[id] || 0) + 1;
+      saveState();
+      renderAll();
+    }
+
+    function changeQty(id, delta) {
+      state.cart[id] = (state.cart[id] || 0) + delta;
+      if (state.cart[id] <= 0) delete state.cart[id];
+      saveState(); renderAll();
+    }
+
+    function removeFromCart(id) { delete state.cart[id]; saveState(); renderAll(); }
+
+    function renderCart() {
+      const items = cartItems();
+      const suggestions = getUpsellSuggestions();
+      byId('cart').innerHTML = `
+        <h2>Cart & Checkout</h2>
+        ${items.length === 0 ? `<div class="card"><p>Your cart is empty.</p><button class="primary" onclick="go('menu')">Browse Menu</button></div>` : `
+          <div class="grid-2">
+            <div class="card">
+              <h3>Order Summary</h3>
+              ${items.map(x => `
+                <div class="cart-line">
+                  <div><strong>${x.name}</strong><br><span class="tag">${money(x.price)} each</span></div>
+                  <div class="qty"><button class="secondary" onclick="changeQty('${x.id}', -1)">-</button><strong>${x.qty}</strong><button class="secondary" onclick="changeQty('${x.id}', 1)">+</button></div>
+                  <strong>${money(x.price * x.qty)}</strong>
+                  <button class="danger" onclick="removeFromCart('${x.id}')">Remove</button>
+                </div>`).join('')}
+              <div class="cart-line"><strong>Total</strong><strong>${money(cartTotal())}</strong></div>
+              <h3 style="margin-top:18px">Frequently ordered with</h3>
+              ${suggestions.length ? suggestions.map(s => `<div class="mini-line"><span>${s.name} - ${money(s.price)}</span><button class="secondary" onclick="addToCart('${s.id}')">Add</button></div>`).join('') : '<p>No suggestion yet.</p>'}
+            </div>
+            <div class="card">
+              <h3>Customer Information</h3>
+              <div class="form-grid">
+                <input id="custName" class="input" placeholder="Name" />
+                <input id="custPhone" class="input" placeholder="Phone number" />
+                <input id="custAddress" class="input full" placeholder="Delivery address" />
+                <textarea id="custInstructions" class="full" placeholder="Delivery instructions or food preferences"></textarea>
+                <select id="paymentMethod" class="input full"><option>Cash</option><option>Card at delivery</option></select>
+              </div>
+              <button class="primary" style="margin-top:14px;width:100%" onclick="placeOrder()">Confirm Order</button>
+            </div>
+          </div>`}
+      `;
+    }
+
+    function getUpsellSuggestions() {
+      const inCart = new Set(Object.keys(state.cart));
+      const base = cartItems();
+      let preferred = [];
+      if (base.some(x => ['Burgers', 'Tacos', 'Plates'].includes(x.category))) preferred = ['fries', 'mango-juice', 'cola'];
+      else if (base.some(x => ['Sushi', 'Salads'].includes(x.category))) preferred = ['mango-juice', 'cheesecake'];
+      else preferred = ['fries', 'cola', 'chocolate-cake'];
+      return preferred.map(getMenuItem).filter(x => x && x.available && !inCart.has(x.id)).slice(0, 3);
+    }
+
+    function placeOrder() {
+      const items = cartItems();
+      if (!items.length) return alert('Your cart is empty.');
+      const unavailable = items.find(x => !x.available);
+      if (unavailable) return alert(`${unavailable.name} is no longer available. Remove it before checkout.`);
+      const name = byId('custName').value.trim();
+      const phone = byId('custPhone').value.trim();
+      const address = byId('custAddress').value.trim();
+      const instructions = byId('custInstructions').value.trim();
+      const payment = byId('paymentMethod').value;
+      if (!name || !phone || !address) return alert('Please fill in name, phone number, and address.');
+      const id = `FY-${Math.floor(1000 + Math.random() * 9000)}`;
+      const order = {
+        id, createdAt: new Date().toISOString(), status: 'Order received',
+        customer: {name, phone, address, instructions}, payment, deliveryId: '',
+        items: items.map(x => ({id: x.id, name: x.name, price: x.price, qty: x.qty})), total: cartTotal()
+      };
+      state.orders.unshift(order);
+      state.cart = {};
+      state.lastOrderId = id;
+      saveState();
+      alert(`Order confirmed. Your order ID is ${id}`);
+      go('track');
+    }
+
+    function renderTrack() {
+      const id = state.lastOrderId || '';
+      const order = id ? state.orders.find(o => o.id === id) : null;
+      byId('track').innerHTML = `
+        <h2>Track Order</h2>
+        <div class="card">
+          <p>Enter an order ID or use the latest order created in this browser.</p>
+          <div class="row"><input id="trackId" class="input" value="${id}" placeholder="Example: FY-1001" /><button class="primary" onclick="trackSpecificOrder()">Track</button></div>
+        </div>
+        <div id="trackingResult" style="margin-top:16px">${order ? trackingHtml(order) : '<p>No order selected yet.</p>'}</div>
+      `;
+    }
+
+    function trackSpecificOrder() {
+      const id = byId('trackId').value.trim().toUpperCase();
+      state.lastOrderId = id;
+      saveState();
+      renderTrack();
+    }
+
+    function trackingHtml(order) {
+      const isCancelled = order.status === 'Cancelled' || order.status === 'Rejected';
+      return `
+        <div class="card">
+          <div class="order-head"><div><h3>Order ${order.id}</h3><p>${order.customer.name} - ${money(order.total)}</p></div><span class="tag ${isCancelled ? 'red' : 'green'}">${order.status}</span></div>
+          <div class="status-steps">${statusOrder.map(s => `<div class="step ${isCancelled ? 'cancelled' : (statusOrder.indexOf(s) <= statusOrder.indexOf(order.status) ? 'done' : '')}">${s}</div>`).join('')}</div>
+          <div class="mini-line"><strong>Payment</strong><span>${order.payment}</span></div>
+          <div class="mini-line"><strong>Delivery person</strong><span>${order.deliveryId ? getDeliveryName(order.deliveryId) : 'Not assigned yet'}</span></div>
+          <div class="mini-line"><strong>Items</strong><span>${order.items.map(i => `${i.qty}x ${i.name}`).join(', ')}</span></div>
+          <p>Estimated preparation time is shown as a range because kitchen timing can vary.</p>
+        </div>`;
+    }
+
+    function renderAssistant() {
+      byId('assistant').innerHTML = `
+        <h2>AI Menu Assistant</h2>
+        <p>This is a free rule-based assistant for the demo. It recommends only available menu items.</p>
+        <div class="notice">No paid AI API is used here. This keeps the prototype free.</div>
+        <div class="card">
+          <div id="chatBox" class="chat-box">${state.chat.map(m => `<div class="msg ${m.from === 'user' ? 'user-msg' : 'bot-msg'}">${m.text}</div>`).join('')}</div>
+          <div class="row" style="margin-bottom:10px">
+            ${['I want something light', 'I am very hungry', 'I want a drink', 'No cheese please'].map(p => `<button class="secondary" onclick="quickPrompt('${p}')">${p}</button>`).join('')}
+          </div>
+          <div class="row"><input id="chatInput" class="input" placeholder="Type your request..." onkeydown="if(event.key==='Enter') sendChat()" /><button class="primary" onclick="sendChat()">Send</button></div>
+        </div>
+      `;
+      setTimeout(() => { const box = byId('chatBox'); if (box) box.scrollTop = box.scrollHeight; }, 10);
+    }
+
+    function quickPrompt(text) { byId('chatInput').value = text; sendChat(); }
+    function sendChat() {
+      const input = byId('chatInput');
+      const text = input.value.trim();
+      if (!text) return;
+      state.chat.push({from: 'user', text});
+      state.chat.push({from: 'bot', text: assistantReply(text)});
+      input.value = '';
+      saveState(); renderAssistant();
+    }
+
+    function assistantReply(text) {
+      const t = text.toLowerCase();
+      let picks = [];
+      if (t.includes('light') || t.includes('calorie') || t.includes('healthy')) picks = state.menu.filter(x => ['Salads', 'Sushi'].includes(x.category));
+      else if (t.includes('hungry') || t.includes('big') || t.includes('full')) picks = state.menu.filter(x => ['Plates', 'Burgers', 'Pasta'].includes(x.category));
+      else if (t.includes('drink') || t.includes('juice')) picks = state.menu.filter(x => x.category === 'Drinks');
+      else if (t.includes('dessert') || t.includes('sweet')) picks = state.menu.filter(x => x.category === 'Desserts');
+      else if (t.includes('cheese')) picks = state.menu.filter(x => !x.ingredients.includes('cheese'));
+      else if (t.includes('spicy')) picks = state.menu.filter(x => ['Tacos', 'Burgers'].includes(x.category));
+      else picks = state.menu.filter(x => x.available).slice(0, 3);
+      picks = picks.filter(x => x.available).slice(0, 3);
+      if (!picks.length) return 'I could not find an available match. Please check the menu or ask for another type of meal.';
+      return `I recommend: ${picks.map(x => `${x.name} (${money(x.price)})`).join(', ')}. You can add them from the Menu page.`;
+    }
+
+    function renderManager() {
+      if (!managerLoggedIn) {
+        byId('manager').innerHTML = loginHtml('Manager Login', 'Use PIN 1234 for the demo.', 'managerPin', 'loginManager()');
+        return;
+      }
+      byId('manager').innerHTML = `
+        <h2>Manager Dashboard</h2>
+        <div class="tabs">
+          ${['orders', 'menu', 'analytics'].map(t => `<button class="secondary ${managerTab === t ? 'active' : ''}" onclick="managerTab='${t}'; renderManager()">${t[0].toUpperCase()+t.slice(1)}</button>`).join('')}
+          <button class="ghost" onclick="managerLoggedIn=false; renderManager()">Logout</button>
+          <button class="danger" onclick="resetDemo()">Reset Demo Data</button>
+        </div>
+        ${managerTab === 'orders' ? managerOrdersHtml() : managerTab === 'menu' ? managerMenuHtml() : managerAnalyticsHtml()}
+      `;
+    }
+
+    function loginHtml(title, help, inputId, action) {
+      return `<div class="card login-box"><h2>${title}</h2><p>${help}</p><input id="${inputId}" class="input" type="password" placeholder="Enter PIN" onkeydown="if(event.key==='Enter') ${action}" /><button class="primary" style="width:100%;margin-top:12px" onclick="${action}">Enter</button></div>`;
+    }
+
+    function loginManager() {
+      if (byId('managerPin').value === MANAGER_PIN) { managerLoggedIn = true; renderManager(); }
+      else alert('Wrong PIN. Use 1234 for the demo.');
+    }
+
+    function managerOrdersHtml() {
+      return `<div class="card"><h3>Order Queue</h3><p>Accept orders, update their status, and assign delivery personnel.</p>${state.orders.map(orderCard).join('') || '<p>No orders yet.</p>'}</div>`;
+    }
+
+    function orderCard(o) {
+      return `<div class="order-card">
+        <div class="order-head"><div><strong>${o.id}</strong><br><span class="tag">${timeAgo(o.createdAt)}</span> <span class="tag">${o.items.length} item types</span></div><span class="tag ${o.status === 'Cancelled' || o.status === 'Rejected' ? 'red' : 'green'}">${o.status}</span></div>
+        <div><strong>${o.customer.name}</strong> - ${o.customer.phone}<br><span>${o.customer.address}</span></div>
+        <div>${o.items.map(i => `${i.qty}x ${i.name}`).join(', ')}</div>
+        <div class="mini-line"><strong>Total</strong><span>${money(o.total)} - ${o.payment}</span></div>
+        <div class="row">
+          <select class="input" style="max-width:210px" onchange="assignDelivery('${o.id}', this.value)">
+            <option value="">Assign delivery person</option>
+            ${state.deliveryPeople.map(d => `<option value="${d.id}" ${o.deliveryId === d.id ? 'selected' : ''}>${d.name} ${d.available ? '(Available)' : '(Unavailable)'}</option>`).join('')}
+          </select>
+        </div>
+        <div class="order-actions">
+          <button class="success" onclick="updateOrderStatus('${o.id}','Accepted')">Accept</button>
+          <button class="secondary" onclick="updateOrderStatus('${o.id}','Preparing')">Preparing</button>
+          <button class="secondary" onclick="updateOrderStatus('${o.id}','Out for delivery')">Out for delivery</button>
+          <button class="success" onclick="updateOrderStatus('${o.id}','Delivered')">Delivered</button>
+          <button class="danger" onclick="updateOrderStatus('${o.id}','Rejected')">Reject</button>
+          <button class="ghost" onclick="openOrderDetails('${o.id}')">Details</button>
+        </div>
+      </div>`;
+    }
+
+    function openOrderDetails(id) {
+      const o = state.orders.find(x => x.id === id);
+      showModal(`<h2>Order ${o.id}</h2>
+        <div class="mini-line"><strong>Status</strong><span>${o.status}</span></div>
+        <div class="mini-line"><strong>Customer</strong><span>${o.customer.name}</span></div>
+        <div class="mini-line"><strong>Phone</strong><span>${o.customer.phone}</span></div>
+        <div class="mini-line"><strong>Address</strong><span>${o.customer.address}</span></div>
+        <div class="mini-line"><strong>Instructions</strong><span>${o.customer.instructions || 'None'}</span></div>
+        <div class="mini-line"><strong>Payment</strong><span>${o.payment}</span></div>
+        <div class="mini-line"><strong>Items</strong><span>${o.items.map(i => `${i.qty}x ${i.name}`).join(', ')}</span></div>
+        <div class="mini-line"><strong>Total</strong><span>${money(o.total)}</span></div>
+        <button class="secondary" style="margin-top:14px" onclick="closeModal()">Close</button>`);
+    }
+
+    function updateOrderStatus(id, status) {
+      const o = state.orders.find(x => x.id === id);
+      if (!o) return;
+      o.status = status;
+      if (status === 'Out for delivery' && !o.deliveryId) alert('Tip: assign a delivery person before dispatching.');
+      saveState(); renderAll();
+    }
+
+    function assignDelivery(orderId, deliveryId) {
+      const o = state.orders.find(x => x.id === orderId);
+      if (o) { o.deliveryId = deliveryId; if (deliveryId && o.status === 'Preparing') o.status = 'Out for delivery'; }
+      saveState(); renderAll();
+    }
+
+    function managerMenuHtml() {
+      return `<div class="card"><h3>Menu Availability Control</h3><p>Toggle items available or unavailable. Customers cannot order unavailable meals.</p>${state.menu.map(item => `<div class="staff-line"><div><strong>${item.name}</strong><br><span class="tag">${item.category} - ${money(item.price)}</span></div><button class="${item.available ? 'success' : 'danger'}" onclick="toggleMenuAvailability('${item.id}')">${item.available ? 'Available' : 'Unavailable'}</button></div>`).join('')}</div>`;
+    }
+
+    function toggleMenuAvailability(id) {
+      const item = getMenuItem(id);
+      item.available = !item.available;
+      saveState(); renderAll();
+    }
+
+    function managerAnalyticsHtml() {
+      const valid = state.orders.filter(o => !['Rejected', 'Cancelled'].includes(o.status));
+      const revenue = valid.reduce((s, o) => s + o.total, 0);
+      const itemCounts = {};
+      valid.forEach(o => o.items.forEach(i => itemCounts[i.name] = (itemCounts[i.name] || 0) + i.qty));
+      const top = Object.entries(itemCounts).sort((a,b) => b[1]-a[1]).slice(0,5);
+      const peak = getPeakHours(valid);
+      return `<div class="grid-2">
+        <div class="card"><h3>Key Metrics</h3>
+          <div class="stat-box"><div class="stat-value">${money(revenue)}</div><div class="stat-label">Total revenue in demo</div></div><br>
+          <div class="stat-box"><div class="stat-value">${valid.length}</div><div class="stat-label">Valid orders</div></div><br>
+          <div class="stat-box"><div class="stat-value">${valid.length ? money(Math.round(revenue / valid.length)) : '0 MAD'}</div><div class="stat-label">Average order value</div></div>
+        </div>
+        <div class="card"><h3>Most Ordered Items</h3>${top.length ? top.map(([name,count]) => `<div class="mini-line"><span>${name}</span><strong>${count}</strong></div>`).join('') : '<p>No order data yet.</p>'}</div>
+        <div class="card"><h3>Peak Demand Times</h3>${peak.map(([hour,count]) => `<div class="mini-line"><span>${hour}:00 - ${hour}:59</span><strong>${count} orders</strong></div>`).join('') || '<p>No data yet.</p>'}</div>
+        <div class="card"><h3>Operational Insight</h3><p>The dashboard helps the manager monitor order volume, popular items, and delivery progress without relying only on memory.</p></div>
+      </div>`;
+    }
+
+    function getPeakHours(orders) {
+      const counts = {};
+      orders.forEach(o => { const h = new Date(o.createdAt).getHours(); counts[h] = (counts[h] || 0) + 1; });
+      return Object.entries(counts).sort((a,b) => b[1]-a[1]).slice(0,4);
+    }
+
+    function renderDelivery() {
+      if (!deliveryLoggedIn) {
+        byId('delivery').innerHTML = loginHtml('Delivery Login', 'Use PIN 2222 for the demo.', 'deliveryPin', 'loginDelivery()');
+        return;
+      }
+      const assigned = state.orders.filter(o => o.deliveryId === deliveryPersonId && !['Delivered', 'Rejected', 'Cancelled'].includes(o.status));
+      const delivered = state.orders.filter(o => o.deliveryId === deliveryPersonId && o.status === 'Delivered').length;
+      const me = state.deliveryPeople.find(d => d.id === deliveryPersonId);
+      byId('delivery').innerHTML = `
+        <h2>Delivery Dashboard</h2>
+        <div class="card" style="margin-bottom:14px">
+          <div class="row">
+            <select class="input" style="max-width:250px" onchange="deliveryPersonId=this.value; renderDelivery()">${state.deliveryPeople.map(d => `<option value="${d.id}" ${deliveryPersonId === d.id ? 'selected' : ''}>${d.name}</option>`).join('')}</select>
+            <button class="${me.available ? 'success' : 'danger'}" onclick="toggleDeliveryAvailability('${me.id}')">${me.available ? 'Available' : 'Unavailable'}</button>
+            <button class="ghost" onclick="deliveryLoggedIn=false; renderDelivery()">Logout</button>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="card"><h3>Assigned Orders</h3>${assigned.length ? assigned.map(deliveryOrderCard).join('') : '<p>No assigned active orders.</p>'}</div>
+          <div class="card"><h3>Performance</h3><div class="stat-box"><div class="stat-value">${delivered}</div><div class="stat-label">Delivered orders in demo</div></div><br><div class="stat-box"><div class="stat-value">${assigned.length}</div><div class="stat-label">Pending assigned orders</div></div></div>
+        </div>
+      `;
+    }
+
+    function loginDelivery() {
+      if (byId('deliveryPin').value === DELIVERY_PIN) { deliveryLoggedIn = true; renderDelivery(); }
+      else alert('Wrong PIN. Use 2222 for the demo.');
+    }
+
+    function deliveryOrderCard(o) {
+      return `<div class="order-card">
+        <div class="order-head"><strong>${o.id}</strong><span class="tag green">${o.status}</span></div>
+        <div><strong>${o.customer.name}</strong><br>${o.customer.phone}<br>${o.customer.address}</div>
+        <div class="mini-line"><strong>Payment</strong><span>${o.payment}</span></div>
+        <div class="mini-line"><strong>Items</strong><span>${o.items.map(i => `${i.qty}x ${i.name}`).join(', ')}</span></div>
+        <button class="success" onclick="updateOrderStatus('${o.id}','Delivered')">Mark as Delivered</button>
+      </div>`;
+    }
+
+    function toggleDeliveryAvailability(id) {
+      const d = state.deliveryPeople.find(x => x.id === id);
+      d.available = !d.available;
+      saveState(); renderAll();
+    }
+
+    function timeAgo(dateString) {
+      const mins = Math.max(0, Math.round((Date.now() - new Date(dateString).getTime()) / 60000));
+      if (mins < 1) return 'just now';
+      if (mins < 60) return `${mins} min ago`;
+      return `${Math.round(mins/60)} h ago`;
+    }
+
+    function showModal(html) {
+      byId('modal').innerHTML = html;
+      byId('modalBackdrop').classList.add('show');
+    }
+    function closeModal() { byId('modalBackdrop').classList.remove('show'); }
+    byId('modalBackdrop').addEventListener('click', e => { if (e.target.id === 'modalBackdrop') closeModal(); });
+
+    function resetDemo() {
+      if (!confirm('Reset all demo orders, menu availability, cart, and chat?')) return;
+      localStorage.removeItem(STORE_KEY);
+      state = loadState();
+      renderAll();
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#039;','"':'&quot;'}[c]));
+    }
+
+    renderAll();
+  </script>
+</body>
+</html>
