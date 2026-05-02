@@ -2176,6 +2176,48 @@
     .scope-banner strong { display:block; font-size:18px; margin-bottom:3px; }
     .scope-banner span { color: var(--muted); }
 
+    .gps-box {
+      margin-top: 10px;
+      padding: 12px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.78);
+      border: 1px solid rgba(56,47,39,0.10);
+      display: grid;
+      gap: 10px;
+    }
+    .gps-status {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+    .gps-status.success {
+      color: #0f7b60;
+      font-weight: 800;
+    }
+    .gps-status.error {
+      color: #b54444;
+      font-weight: 800;
+    }
+    .maps-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 7px 11px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #5ad8bb, #9ceacb);
+      color: #11362d !important;
+      font-size: 12px;
+      font-weight: 900;
+      text-decoration: none;
+      border: 1px solid rgba(17,54,45,0.10);
+      white-space: nowrap;
+    }
+    .maps-link:hover {
+      filter: saturate(1.05);
+      transform: translateY(-1px);
+    }
+
   </style>
 </head>
 <body>
@@ -2202,7 +2244,7 @@
   </div>
 
   <script>
-    const STORE_KEY = 'for_you_restaurant_demo_v19_clean_scope_controls';
+    const STORE_KEY = 'for_you_restaurant_demo_v20_gps_checkout';
     const MANAGER_PIN = '1234';
     const DELIVERY_PIN = '2222';
 
@@ -9411,7 +9453,70 @@ function renderMenu() {
 
     function removeFromCart(id) { delete state.cart[id]; saveState(); renderAll(); }
 
-    function renderCart() {
+    
+    let checkoutLocation = null;
+
+    function mapsUrlFromLocation(location) {
+      if (!location || location.lat == null || location.lng == null) return '';
+      return `https://www.google.com/maps?q=${location.lat},${location.lng}`;
+    }
+
+    function mapsLinkHtml(location, label = 'Open in Google Maps') {
+      const url = mapsUrlFromLocation(location);
+      if (!url) return '<span>Not provided</span>';
+      return `<a class="maps-link" href="${url}" target="_blank" rel="noopener">${label}</a>`;
+    }
+
+    function customerLocationLine(customer) {
+      if (!customer || !customer.location) return '';
+      const loc = customer.location;
+      const accuracy = loc.accuracy ? ` · accuracy ~${Math.round(loc.accuracy)}m` : '';
+      return `<div class="mini-line"><strong>GPS location</strong><span>${mapsLinkHtml(loc)}<br><small style="color:var(--muted)">${Number(loc.lat).toFixed(5)}, ${Number(loc.lng).toFixed(5)}${accuracy}</small></span></div>`;
+    }
+
+    function useCurrentLocation() {
+      const status = byId('gpsStatus');
+      if (!navigator.geolocation) {
+        if (status) {
+          status.className = 'gps-status error';
+          status.textContent = 'Location is not supported by this browser. Please type your address manually.';
+        }
+        return;
+      }
+      if (status) {
+        status.className = 'gps-status';
+        status.textContent = 'Requesting permission and detecting your current location...';
+      }
+      navigator.geolocation.getCurrentPosition(
+        pos => {
+          checkoutLocation = {
+            lat: Number(pos.coords.latitude.toFixed(6)),
+            lng: Number(pos.coords.longitude.toFixed(6)),
+            accuracy: pos.coords.accuracy || null,
+            capturedAt: new Date().toISOString()
+          };
+          const addressInput = byId('custAddress');
+          if (addressInput && !addressInput.value.trim()) {
+            addressInput.value = 'Current GPS location selected';
+          }
+          if (status) {
+            status.className = 'gps-status success';
+            status.innerHTML = `Location saved. ${mapsLinkHtml(checkoutLocation, 'Preview map')}<br><small>${checkoutLocation.lat}, ${checkoutLocation.lng}${checkoutLocation.accuracy ? ` · accuracy ~${Math.round(checkoutLocation.accuracy)}m` : ''}</small>`;
+          }
+        },
+        err => {
+          checkoutLocation = null;
+          if (status) {
+            status.className = 'gps-status error';
+            const msg = err.code === 1 ? 'Permission denied. Please allow location access or type your address manually.' : 'Could not detect location. Please try again or type your address manually.';
+            status.textContent = msg;
+          }
+        },
+        { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 }
+      );
+    }
+
+function renderCart() {
       const items = cartItems();
       const suggestions = getUpsellSuggestions();
       byId('cart').innerHTML = `
@@ -9436,7 +9541,11 @@ function renderMenu() {
               <div class="form-grid">
                 <input id="custName" class="input" placeholder="Name" />
                 <input id="custPhone" class="input" placeholder="Phone number" />
-                <input id="custAddress" class="input full" placeholder="Delivery address" />
+                <input id="custAddress" class="input full" placeholder="Delivery address or use GPS below" />
+                <div class="gps-box full">
+                  <button type="button" class="secondary" onclick="useCurrentLocation()">Use my current location</button>
+                  <div id="gpsStatus" class="gps-status">Optional: automatically capture your GPS coordinates for delivery accuracy.</div>
+                </div>
                 <textarea id="custInstructions" class="full" placeholder="Delivery instructions or food preferences"></textarea>
                 <select id="paymentMethod" class="input full"><option>Cash</option><option>Card at delivery</option></select>
               </div>
@@ -9474,16 +9583,17 @@ function renderMenu() {
       const address = byId('custAddress').value.trim();
       const instructions = byId('custInstructions').value.trim();
       const payment = byId('paymentMethod').value;
-      if (!name || !phone || !address) return alert('Please fill in name, phone number, and address.');
+      if (!name || !phone || (!address && !checkoutLocation)) return alert('Please fill in name and phone number, then either type an address or use current location.');
       const id = `FY-${Math.floor(1000 + Math.random() * 9000)}`;
       const order = {
         id, createdAt: new Date().toISOString(), status: 'Order received',
         acceptedAt: null, deliveryAccepted: false,
-        customer: {name, phone, address, instructions}, payment, deliveryId: '',
+        customer: {name, phone, address: address || 'GPS location selected', instructions, location: checkoutLocation}, payment, deliveryId: '',
         items: items.map(x => ({id: x.id, name: x.name, price: x.price, qty: x.qty})), total: cartTotal()
       };
       state.orders.unshift(order);
       state.cart = {};
+      checkoutLocation = null;
       state.lastOrderId = id;
       saveState();
       alert(`Order confirmed. Your order ID is ${id}`);
@@ -9520,6 +9630,8 @@ function renderMenu() {
           ${isAcceptedWaiting ? `<div class="notice" style="margin:12px 0">⏱ Your order was accepted. Kitchen starts in ~${minsLeft} min.</div>` : ''}
           <div class="status-steps">${statusOrder.map(s => `<div class="step ${isCancelled ? 'cancelled' : (statusOrder.indexOf(s) <= statusOrder.indexOf(order.status) ? 'done' : '')}">${s}</div>`).join('')}</div>
           <div class="mini-line"><strong>Payment</strong><span>${order.payment}</span></div>
+          <div class="mini-line"><strong>Address</strong><span>${order.customer.address}</span></div>
+          ${customerLocationLine(order.customer)}
           <div class="mini-line"><strong>Delivery person</strong><span>${order.deliveryId ? getDeliveryName(order.deliveryId) : 'Not assigned yet'}</span></div>
           <div class="mini-line"><strong>Items</strong><span>${order.items.map(i => `${i.qty}x ${i.name}`).join(', ')}</span></div>
           <p>Estimated preparation time is shown as a range because kitchen timing can vary.</p>
@@ -10009,7 +10121,7 @@ function renderMenu() {
             <div class="row" style="gap:8px"><strong>${o.id}</strong><span class="status-tag ${statusTagClass(o.status)}">${o.status}</span></div>
             <div style="font-size:13px">${o.items.map(i=>`${i.qty}x ${i.name}`).join(', ')}</div>
             <div class="stat-label">⏱ ${timeAgo(o.createdAt)} · ${money(o.total)} · ${o.payment}</div>
-            <div class="stat-label">📍 ${o.customer.name} — ${o.customer.phone} — ${o.customer.address}</div>
+            <div class="stat-label">Location: ${o.customer.name} — ${o.customer.phone} — ${o.customer.address} ${o.customer.location ? `— ${mapsLinkHtml(o.customer.location)}` : ''}</div>
             ${o.status==='Accepted'&&o.acceptedAt?`<div class="stat-label" style="color:var(--accent)">⏳ Kitchen starts in ~${Math.max(0,5-Math.round((Date.now()-o.acceptedAt)/60000))} min</div>`:''}
           </div>
           <div class="mgr-order-actions">${mgrOrderActions(o)}</div>
@@ -10098,6 +10210,7 @@ function renderMenu() {
         <div class="mini-line"><strong>Customer</strong><span>${o.customer.name}</span></div>
         <div class="mini-line"><strong>Phone</strong><span>${o.customer.phone}</span></div>
         <div class="mini-line"><strong>Address</strong><span>${o.customer.address}</span></div>
+        ${customerLocationLine(o.customer)}
         <div class="mini-line"><strong>Instructions</strong><span>${o.customer.instructions || 'None'}</span></div>
         <div class="mini-line"><strong>Payment</strong><span>${o.payment}</span></div>
         <div class="mini-line"><strong>Items</strong><span>${o.items.map(i=>`${i.qty}x ${i.name}`).join(', ')}</span></div>
@@ -10733,6 +10846,7 @@ function renderDelivery() {
             <div>
               <div class="mini-line"><strong>Customer</strong><span>${o.customer.name}</span></div>
               <div class="mini-line"><strong>Address</strong><span>${o.customer.address}</span></div>
+              ${customerLocationLine(o.customer)}
               <div class="mini-line"><strong>Phone</strong><span>${o.customer.phone}</span></div>
             </div>
             <strong>${money(o.total)}</strong>
@@ -10749,6 +10863,7 @@ function renderDelivery() {
         <div class="mini-line"><strong>Customer</strong><span>${o.customer.name}</span></div>
         <div class="mini-line"><strong>Phone</strong><span>${o.customer.phone}</span></div>
         <div class="mini-line"><strong>Address</strong><span>${o.customer.address}</span></div>
+        ${customerLocationLine(o.customer)}
         <div class="mini-line"><strong>Items</strong><span>${o.items.map(i => `${i.qty}x ${i.name}`).join(', ')}</span></div>
         <div class="mini-line"><strong>Payment</strong><span>${o.payment}</span></div>
         <h3>Total: ${money(o.total)}</h3>
