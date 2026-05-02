@@ -2041,6 +2041,106 @@
       .analytics-control-group select,.analytics-control-group button{width:100%}
     }
 
+    .month-overview-layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+    .month-day-tiles {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 14px;
+    }
+    .month-day-tile {
+      min-height: 72px;
+      border-radius: 14px;
+      padding: 10px;
+      border: 1px solid rgba(56,47,39,0.08);
+      background: rgba(255,255,255,0.72);
+      cursor: pointer;
+      transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+    .month-day-tile:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 22px rgba(0,0,0,0.09);
+      background: #fff8ef;
+    }
+    .month-day-tile.empty {
+      opacity: .34;
+      cursor: default;
+    }
+    .month-day-tile.empty:hover {
+      transform: none;
+      box-shadow: none;
+    }
+    .month-day-tile strong {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+    .month-day-tile .rev {
+      color: #d75d25;
+      font-weight: 900;
+      font-size: 13px;
+    }
+    .month-day-tile .orders {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 2px;
+    }
+    .all-period-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+    .all-month-card {
+      padding: 16px;
+      border-radius: 20px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.94), rgba(255,247,238,0.88));
+      border: 1px solid rgba(56,47,39,0.08);
+      cursor: pointer;
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+    .all-month-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 14px 26px rgba(0,0,0,0.10);
+    }
+    .all-month-card.active {
+      outline: 3px solid rgba(255,122,47,0.22);
+      border-color: rgba(255,122,47,0.38);
+    }
+    .all-month-card strong {
+      display: block;
+      font-size: 18px;
+      margin-bottom: 4px;
+    }
+    .all-month-card .money {
+      color: #d75d25;
+      font-weight: 900;
+      margin-top: 8px;
+    }
+    .tiny-progress {
+      height: 8px;
+      background: rgba(239,229,219,0.96);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+    .tiny-progress > div {
+      height: 100%;
+      background: linear-gradient(90deg, #ff7a2f, #ffd16d, #58d7ba);
+      border-radius: 999px;
+    }
+    @media(max-width:900px){
+      .month-day-tiles{grid-template-columns:repeat(4,minmax(0,1fr))}
+      .all-period-grid{grid-template-columns:1fr 1fr}
+    }
+    @media(max-width:560px){
+      .month-day-tiles,.all-period-grid{grid-template-columns:1fr}
+    }
+
   </style>
 </head>
 <body>
@@ -2067,7 +2167,7 @@
   </div>
 
   <script>
-    const STORE_KEY = 'for_you_restaurant_demo_v16_interactive_analytics_cash_card';
+    const STORE_KEY = 'for_you_restaurant_demo_v17_month_all_analytics';
     const MANAGER_PIN = '1234';
     const DELIVERY_PIN = '2222';
 
@@ -9833,6 +9933,31 @@ function renderMenu() {
       const selectedWeekRevenue = weekOrders.reduce((s,o)=>s+o.total,0);
       const selectedWeekAvg = weekOrders.length ? Math.round(selectedWeekRevenue / weekOrders.length) : 0;
       const selectedMonthRevenue = selectedMonthOrders.reduce((s,o)=>s+o.total,0);
+      const selectedMonthAvg = selectedMonthOrders.length ? Math.round(selectedMonthRevenue / selectedMonthOrders.length) : 0;
+      const [selectedYear, selectedMonthNumber] = analyticsMonth.split('-').map(Number);
+      const monthStart = new Date(selectedYear, selectedMonthNumber - 1, 1);
+      const monthEnd = new Date(selectedYear, selectedMonthNumber, 0);
+      const monthDayStats = [];
+      for (let day = 1; day <= monthEnd.getDate(); day++) {
+        const date = new Date(selectedYear, selectedMonthNumber - 1, day);
+        const key = isoDate(date);
+        const orders = selectedMonthOrders.filter(o => isoDate(parseDate(o)) === key);
+        monthDayStats.push({
+          date,
+          key,
+          day,
+          revenue: orders.reduce((s,o)=>s+o.total,0),
+          orders: orders.length
+        });
+      }
+      const maxMonthDayRevenue = Math.max(1, ...monthDayStats.map(d => d.revenue));
+      const allMonthStats = monthKeys.map(key => {
+        const orders = valid.filter(o => monthKey(parseDate(o)) === key);
+        const revenue = orders.reduce((s,o)=>s+o.total,0);
+        const deliveredCount = orders.filter(o => o.status === 'Delivered').length;
+        return { key, orders: orders.length, revenue, delivered: deliveredCount, avg: orders.length ? Math.round(revenue/orders.length) : 0 };
+      });
+      const maxAllMonthRevenue = Math.max(1, ...allMonthStats.map(m => m.revenue));
 
       const statusColors = {
         'Order received':'#ef4444',
@@ -9896,7 +10021,7 @@ function renderMenu() {
         <div class="analytics-control-panel">
           <div>
             <h3>Interactive analytics timeline</h3>
-            <p>Select any week or month from January 1, 2026 to May 2, 2026. Click a day bar to see order details.</p>
+            <p>Select a week, select a month, or use the all-data section below. Month selection now updates a full monthly view.</p>
           </div>
           <div class="analytics-control-group">
             <select onchange="analyticsWeekStart=this.value; renderManager()">
@@ -9933,6 +10058,52 @@ function renderMenu() {
             <div class="eyebrow">Peak demand</div>
             <strong>${peakHour ? `${peakHour[0]}:00–${peakHour[0]}:59` : 'No data'}</strong>
             <p>${peakHour ? `${peakHour[1]} order(s) came in during the busiest hour.` : 'No time pattern available yet.'}</p>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="month-overview-layout">
+            <div style="display:flex;justify-content:space-between;gap:14px;align-items:flex-start;flex-wrap:wrap">
+              <div>
+                <h3>Monthly View — ${formatMonth(analyticsMonth)}</h3>
+                <p class="chart-sub">This section changes when you select a month. Click any day to see its orders.</p>
+              </div>
+              <button class="secondary" onclick="openAnalyticsMonth('${analyticsMonth}')">Open month orders</button>
+            </div>
+            <div class="analytics-mini-grid">
+              <div class="analytics-mini-card"><strong>${money(selectedMonthRevenue)}</strong><span>month revenue</span></div>
+              <div class="analytics-mini-card"><strong>${selectedMonthOrders.length}</strong><span>month orders</span></div>
+              <div class="analytics-mini-card"><strong>${money(selectedMonthAvg)}</strong><span>average order</span></div>
+              <div class="analytics-mini-card"><strong>${monthDayStats.sort((a,b)=>b.revenue-a.revenue)[0]?.day || '-'}</strong><span>best day of month</span></div>
+            </div>
+            <div class="month-day-tiles">
+              ${monthDayStats.map(day => `
+                <div class="month-day-tile ${day.orders ? '' : 'empty'}" ${day.orders ? `onclick="openAnalyticsDay('${day.key}')"` : ''} style="${day.orders ? `background:linear-gradient(180deg, rgba(255,255,255,.86), rgba(255,122,47,${0.08 + (day.revenue/maxMonthDayRevenue)*0.25}))` : ''}">
+                  <strong>${day.day}</strong>
+                  <div class="rev">${money(day.revenue)}</div>
+                  <div class="orders">${day.orders} order(s)</div>
+                </div>`).join('')}
+            </div>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div style="display:flex;justify-content:space-between;gap:14px;align-items:flex-start;flex-wrap:wrap">
+            <div>
+              <h3>All Data Overview — Jan 1 to May 2, 2026</h3>
+              <p class="chart-sub">This shows the full synthetic data period, not only one week or one month.</p>
+            </div>
+            <button class="secondary" onclick="openAnalyticsAllOrders()">Open all orders</button>
+          </div>
+          <div class="all-period-grid">
+            ${allMonthStats.map(m => `
+              <div class="all-month-card ${m.key === analyticsMonth ? 'active' : ''}" onclick="analyticsMonth='${m.key}'; renderManager(); openAnalyticsMonth('${m.key}')">
+                <strong>${formatMonth(m.key)}</strong>
+                <span>${m.orders} order(s) · ${m.delivered} delivered</span>
+                <div class="money">${money(m.revenue)}</div>
+                <span>Avg. ${money(m.avg)}</span>
+                <div class="tiny-progress"><div style="width:${Math.round((m.revenue/maxAllMonthRevenue)*100)}%"></div></div>
+              </div>`).join('')}
           </div>
         </div>
 
@@ -10084,6 +10255,37 @@ function renderMenu() {
         <p>${orders.length} valid order(s) · ${money(revenue)} revenue</p>
         <div class="analytics-order-list">
           ${orders.length ? orders.map(o => analyticsOrderRow(o)).join('') : '<p>No valid orders for this week.</p>'}
+        </div>
+      `);
+    }
+
+    function openAnalyticsMonth(monthKeyValue) {
+      const orders = state.orders.filter(o => {
+        const d = new Date(o.createdAt);
+        const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+        return key === monthKeyValue && !['Rejected', 'Cancelled'].includes(o.status);
+      }).sort((a,b) => new Date(a.createdAt) - new Date(b.createdAt));
+      const revenue = orders.reduce((s,o)=>s+o.total,0);
+      const [y,m] = monthKeyValue.split('-').map(Number);
+      const monthName = new Date(y, m - 1, 1).toLocaleDateString('en-US', {month:'long', year:'numeric'});
+      showModal(`
+        <h2>${monthName} Orders</h2>
+        <p>${orders.length} valid order(s) · ${money(revenue)} revenue</p>
+        <div class="analytics-order-list">
+          ${orders.length ? orders.map(o => analyticsOrderRow(o)).join('') : '<p>No valid orders for this month.</p>'}
+        </div>
+      `);
+    }
+
+    function openAnalyticsAllOrders() {
+      const orders = state.orders.filter(o => !['Rejected', 'Cancelled'].includes(o.status))
+        .sort((a,b) => new Date(a.createdAt) - new Date(b.createdAt));
+      const revenue = orders.reduce((s,o)=>s+o.total,0);
+      showModal(`
+        <h2>All Orders — Jan 1 to May 2, 2026</h2>
+        <p>${orders.length} valid order(s) · ${money(revenue)} revenue</p>
+        <div class="analytics-order-list">
+          ${orders.length ? orders.map(o => analyticsOrderRow(o)).join('') : '<p>No valid orders.</p>'}
         </div>
       `);
     }
