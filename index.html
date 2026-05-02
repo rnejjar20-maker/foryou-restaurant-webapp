@@ -157,6 +157,225 @@
     .stat-value { font-size: 24px; font-weight: 900; }
     .stat-label { color: var(--muted); font-size: 13px; }
 
+    .home-hero-new {
+      position: relative;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 28px;
+      align-items: center;
+      min-height: 430px;
+      padding: 38px;
+      border-radius: 30px;
+      border: 1px solid var(--line);
+      background:
+        radial-gradient(circle at 78% 28%, rgba(243,179,91,0.25), transparent 34%),
+        linear-gradient(135deg, #1f140f 0%, #3a2116 42%, #fff0db 100%);
+      box-shadow: var(--shadow);
+    }
+
+    .home-hero-new::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, rgba(31,20,15,0.95) 0%, rgba(31,20,15,0.80) 42%, rgba(31,20,15,0.12) 100%);
+      pointer-events: none;
+    }
+
+    .home-hero-copy, .home-hero-visual {
+      position: relative;
+      z-index: 1;
+    }
+
+    .home-hero-copy h1 {
+      color: white;
+      font-size: 56px;
+      max-width: 640px;
+      letter-spacing: -1.8px;
+    }
+
+    .home-hero-copy p {
+      color: rgba(255,255,255,0.86);
+      font-size: 18px;
+      max-width: 600px;
+      margin-bottom: 22px;
+    }
+
+    .home-hero-copy .tag {
+      background: rgba(255,255,255,0.12);
+      color: white;
+      border-color: rgba(255,255,255,0.18);
+    }
+
+    .home-hero-visual {
+      min-height: 330px;
+      border-radius: 26px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.16);
+      background: #130e2e;
+      box-shadow: 0 24px 55px rgba(0,0,0,0.24);
+    }
+
+    .home-hero-visual img {
+      width: 100%;
+      height: 100%;
+      min-height: 330px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .home-floating-card {
+      position: absolute;
+      right: 24px;
+      bottom: 24px;
+      width: min(300px, 82%);
+      padding: 16px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 18px 40px rgba(0,0,0,0.18);
+    }
+
+    .home-floating-card strong {
+      display: block;
+      font-size: 16px;
+      margin-bottom: 6px;
+    }
+
+    .home-section-title {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 16px;
+      margin: 30px 0 16px;
+    }
+
+    .home-section-title h2 {
+      margin-bottom: 4px;
+    }
+
+    .home-section-title p {
+      margin: 0;
+    }
+
+    .category-showcase {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .category-card {
+      position: relative;
+      min-height: 175px;
+      border-radius: 24px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: linear-gradient(135deg, #26160f, #e8b46b);
+      box-shadow: var(--shadow);
+      cursor: pointer;
+    }
+
+    .category-card img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform .25s ease;
+    }
+
+    .category-card:hover img {
+      transform: scale(1.04);
+    }
+
+    .category-card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(0deg, rgba(28,18,12,0.82) 0%, rgba(28,18,12,0.25) 58%, rgba(28,18,12,0.04) 100%);
+    }
+
+    .category-card-content {
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      bottom: 16px;
+      z-index: 1;
+      color: white;
+    }
+
+    .category-card-content h3 {
+      margin: 0 0 4px;
+      font-size: 22px;
+    }
+
+    .category-card-content span {
+      color: rgba(255,255,255,0.86);
+      font-size: 13px;
+    }
+
+    .how-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .how-card {
+      padding: 18px;
+      border-radius: 22px;
+      border: 1px solid var(--line);
+      background: white;
+      box-shadow: var(--shadow);
+    }
+
+    .step-badge {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: var(--dark);
+      color: white;
+      font-weight: 900;
+      margin-bottom: 12px;
+    }
+
+    .status-strip {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .status-card {
+      padding: 18px;
+      border-radius: 22px;
+      background: var(--soft);
+      border: 1px solid var(--line);
+    }
+
+    .status-card strong {
+      font-size: 24px;
+      display: block;
+      margin-bottom: 3px;
+    }
+
+    @media (max-width: 900px) {
+      .home-hero-new {
+        grid-template-columns: 1fr;
+        padding: 28px;
+      }
+      .home-hero-copy h1 {
+        font-size: 42px;
+      }
+      .category-showcase,
+      .how-grid,
+      .status-strip {
+        grid-template-columns: 1fr;
+      }
+    }
+
+
     .grid {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -566,7 +785,7 @@
   </div>
 
   <script>
-    const STORE_KEY = 'for_you_restaurant_demo_v4_actual_menu_paginated';
+    const STORE_KEY = 'for_you_restaurant_demo_v10_homepage_sushi_combined';
     const MANAGER_PIN = '1234';
     const DELIVERY_PIN = '2222';
 
@@ -2057,32 +2276,86 @@
     }
     function cartTotal() { return cartItems().reduce((sum, x) => sum + x.price * x.qty, 0); }
 
-    function renderHome() {
-      const delivered = state.orders.filter(o => o.status === 'Delivered').length;
-      byId('home').innerHTML = `
-        <div class="hero">
-          <div class="hero-card">
-            <span class="tag dark">Mobile-friendly ordering system</span>
-            <h1>Order from For You without waiting on the phone.</h1>
-            <p>This academic prototype digitizes menu browsing, checkout, order tracking, manager order control, delivery assignment, and basic analytics.</p>
-            <div class="hero-actions">
-              <button class="primary" onclick="go('menu')">Order Now</button>
-              <button class="secondary" onclick="go('assistant')">Ask the Assistant</button>
-              <button class="ghost" onclick="go('manager')">Manager Dashboard</button>
-            </div>
-          </div>
-          <div class="hero-side card">
-            <div class="stat-box"><div class="stat-value">${state.menu.length}</div><div class="stat-label">Menu items</div></div>
-            <div class="stat-box"><div class="stat-value">${state.orders.length}</div><div class="stat-label">Orders in demo system</div></div>
-            <div class="stat-box"><div class="stat-value">${delivered}</div><div class="stat-label">Delivered orders</div></div>
+    function homeCategoryCard(category, label) {
+      const count = state.menu.filter(x => x.category === category).length;
+      const hero = CATEGORY_HERO_IMAGES[category] || '';
+      return `
+        <div class="category-card" onclick="menuFilter='${category}'; menuPage=1; go('menu')">
+          ${hero ? `<img src="${hero}" alt="${category}" />` : ''}
+          <div class="category-card-content">
+            <h3>${category}</h3>
+            <span>${label || `${count} menu item(s)`}</span>
           </div>
         </div>
-        <h2 style="margin-top:28px">Featured dishes</h2>
-        <div class="grid">${state.menu.slice(0, 6).map(dishCard).join('')}</div>
       `;
     }
 
-    
+    function renderHome() {
+      const delivered = state.orders.filter(o => o.status === 'Delivered').length;
+      const activeOrders = state.orders.filter(o => o.status !== 'Delivered' && o.status !== 'Rejected').length;
+      const availableDrivers = state.deliveryPeople.filter(d => d.available).length;
+      const heroImg = CATEGORY_HERO_IMAGES['Sandwiches'] || CATEGORY_HERO_IMAGES['Loaded Fries'] || '';
+      byId('home').innerHTML = `
+        <section class="home-hero-new">
+          <div class="home-hero-copy">
+            <span class="tag">Mobile ordering • Delivery tracking • AI recommendations</span>
+            <h1>Crave it. Order it. Track it.</h1>
+            <p>Browse the For You menu, build your cart, follow your order status, and let the assistant help you choose when you are not sure what to eat.</p>
+            <div class="hero-actions">
+              <button class="primary" onclick="go('menu')">Order Now</button>
+              <button class="secondary" onclick="go('track')">Track Order</button>
+              <button class="ghost" onclick="go('assistant')" style="color:white;border-color:rgba(255,255,255,0.28)">Ask AI Assistant</button>
+            </div>
+          </div>
+          <div class="home-hero-visual">
+            ${heroImg ? `<img src="${heroImg}" alt="For You menu preview" />` : ''}
+            <div class="home-floating-card">
+              <strong>Today at For You</strong>
+              <span class="tag green">Open now</span>
+              <p style="margin:10px 0 0">Fast ordering flow with live manager and delivery views.</p>
+            </div>
+          </div>
+        </section>
+
+        <div class="status-strip">
+          <div class="status-card"><strong>${state.menu.length}</strong><span>Menu items</span></div>
+          <div class="status-card"><strong>${activeOrders}</strong><span>Active orders</span></div>
+          <div class="status-card"><strong>${availableDrivers}</strong><span>Available delivery people</span></div>
+          <div class="status-card"><strong>${delivered}</strong><span>Delivered orders</span></div>
+        </div>
+
+        <div class="home-section-title">
+          <div>
+            <h2>Popular categories</h2>
+            <p>Choose a category and start ordering in a few clicks.</p>
+          </div>
+          <button class="secondary" onclick="go('menu')">View full menu</button>
+        </div>
+        <div class="category-showcase">
+          ${homeCategoryCard('Loaded Fries', 'Cheesy, crispy, fully loaded')}
+          ${homeCategoryCard('Sandwiches', 'Burgers, wraps, tacos and bites')}
+          ${homeCategoryCard('Sushi', 'Rolls, boxes, burritos and bowls')}
+          ${homeCategoryCard('Loaded Mac', 'Creamy mac and cheese specials')}
+          ${homeCategoryCard('Combos', 'Complete meals for cravings')}
+          ${homeCategoryCard('Desserts', 'Sweet finishes and treats')}
+        </div>
+
+        <div class="home-section-title">
+          <div>
+            <h2>How it works</h2>
+            <p>A simple flow for customers, managers, and delivery staff.</p>
+          </div>
+        </div>
+        <div class="how-grid">
+          <div class="how-card"><div class="step-badge">1</div><h3>Browse</h3><p>Explore categories, check details, and find what you want.</p></div>
+          <div class="how-card"><div class="step-badge">2</div><h3>Add to cart</h3><p>Select items and review the order before checkout.</p></div>
+          <div class="how-card"><div class="step-badge">3</div><h3>Place order</h3><p>The manager can accept, prepare, assign, or reject orders.</p></div>
+          <div class="how-card"><div class="step-badge">4</div><h3>Track delivery</h3><p>The delivery view follows a clear accept → deliver workflow.</p></div>
+        </div>
+      `;
+    }
+
+
     function slugifyCategory(value) {
       return String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     }
