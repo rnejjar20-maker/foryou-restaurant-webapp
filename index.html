@@ -814,6 +814,55 @@
     @media(max-width:560px){.dash-grid{grid-template-columns:1fr}}
 
 
+    .analytics-layout{display:grid;gap:16px}
+    .insight-strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:16px}
+    .insight-card{background:linear-gradient(135deg,#fffaf3,#fff);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:var(--shadow)}
+    .insight-card .eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:800}
+    .insight-card strong{display:block;font-size:20px;margin:8px 0 4px}
+    .insight-card p{margin:0;color:var(--muted);font-size:13px;line-height:1.5}
+    .analytics-grid-2{display:grid;grid-template-columns:1.25fr .75fr;gap:16px}
+    .chart-card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:18px;box-shadow:var(--shadow)}
+    .chart-card h3{margin:0 0 6px}
+    .chart-sub{margin:0 0 14px;color:var(--muted);font-size:13px}
+    .week-chart{display:flex;align-items:flex-end;gap:12px;min-height:230px;padding-top:10px}
+    .week-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:10px}
+    .week-bar-wrap{height:170px;width:100%;display:flex;align-items:flex-end;justify-content:center}
+    .week-bar{width:min(46px,100%);border-radius:14px 14px 6px 6px;background:linear-gradient(180deg,#4b2e1f 0%, #d9652b 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,.25)}
+    .week-day{font-size:12px;font-weight:800;color:var(--muted)}
+    .week-amount{font-size:12px;font-weight:900;color:var(--dark)}
+    .week-orders{font-size:11px;color:var(--muted)}
+    .donut-grid{display:grid;gap:16px}
+    .donut-wrap{display:grid;grid-template-columns:140px 1fr;gap:18px;align-items:center}
+    .donut{width:140px;height:140px;border-radius:50%;display:grid;place-items:center;position:relative}
+    .donut::after{content:'';position:absolute;inset:26px;background:#fff;border-radius:50%;box-shadow:inset 0 0 0 1px var(--line)}
+    .donut-center{position:relative;z-index:1;text-align:center;padding:0 10px}
+    .donut-center strong{display:block;font-size:26px;line-height:1}
+    .donut-center span{display:block;font-size:12px;color:var(--muted);margin-top:4px}
+    .legend-list{display:grid;gap:10px}
+    .legend-row{display:grid;grid-template-columns:14px 1fr auto auto;gap:10px;align-items:center;font-size:13px}
+    .legend-dot{width:14px;height:14px;border-radius:999px}
+    .legend-row .name{font-weight:700}
+    .legend-row .count{font-weight:800}
+    .legend-row .pct{color:var(--muted)}
+    .analytics-bottom{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}
+    .ranking-list{display:grid;gap:12px}
+    .ranking-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 14px;border:1px solid var(--line);border-radius:16px;background:#fffaf4}
+    .ranking-row strong{display:block}
+    .ranking-row span{display:block;color:var(--muted);font-size:13px;margin-top:3px}
+    .ranking-value{font-weight:900;color:var(--accent);white-space:nowrap}
+    .driver-grid{display:grid;gap:12px}
+    .driver-card{padding:14px;border-radius:16px;border:1px solid var(--line);background:#fffaf4}
+    .driver-head{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:10px}
+    .driver-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+    .driver-stats div{background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px;text-align:center}
+    .driver-stats strong{display:block;font-size:16px}
+    .driver-stats span{display:block;font-size:11px;color:var(--muted);margin-top:3px}
+    .chip-soft{display:inline-flex;align-items:center;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:800;background:#f6ecde;color:#7a4b1a;border:1px solid #ead4b6}
+    @media(max-width:900px){.insight-strip,.analytics-grid-2,.analytics-bottom{grid-template-columns:1fr}.donut-wrap{grid-template-columns:1fr}.donut{margin:0 auto}.driver-stats{grid-template-columns:1fr 1fr}}
+    @media(max-width:560px){.insight-strip{grid-template-columns:1fr}.week-chart{gap:8px}.week-bar{width:100%}.driver-stats{grid-template-columns:1fr}}
+
+
+
     /* Cleaner delivery availability page */
     .availability-page{display:grid;gap:18px}
     .availability-hero{display:flex;justify-content:space-between;align-items:center;gap:18px;background:linear-gradient(135deg,#fff,#fff0db);border:1px solid var(--line);border-radius:22px;padding:22px;box-shadow:var(--shadow)}
@@ -867,7 +916,7 @@
   </div>
 
   <script>
-    const STORE_KEY = 'for_you_restaurant_demo_v11_home_hours';
+    const STORE_KEY = 'for_you_restaurant_demo_v12_manager_analytics';
     const MANAGER_PIN = '1234';
     const DELIVERY_PIN = '2222';
 
@@ -3059,74 +3108,196 @@ function renderMenu() {
       }));
 
       const categoryRevenue = Object.entries(catStats).sort((a,b) => b[1].revenue - a[1].revenue);
+      const bestCategory = categoryRevenue[0];
       const driverStats = state.deliveryPeople.map(d => {
         const assigned = valid.filter(o => o.deliveryId === d.id);
         const done = assigned.filter(o => o.status === 'Delivered');
         return {name:d.name, available:d.available, assigned:assigned.length, delivered:done.length, revenue:assigned.reduce((s,o)=>s+o.total,0)};
-      });
+      }).sort((a,b)=> b.revenue - a.revenue);
+      const bestDriver = driverStats[0];
 
       const maxCatRevenue = Math.max(1, ...categoryRevenue.map(([cat,data]) => data.revenue));
-      const maxStatus = Math.max(1, ...Object.values(statusCounts));
       const peak = getPeakHours(valid);
+      const peakHour = peak[0];
 
-      return `<h2 style="margin-bottom:14px">Dashboard</h2>
+      const weekdays = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+      const weekdayStats = weekdays.map((label, index) => ({ label, revenue: 0, orders: 0 }));
+      valid.forEach(o => {
+        const d = new Date(o.createdAt);
+        const idx = Number.isNaN(d.getDay()) ? 0 : d.getDay();
+        weekdayStats[idx].orders += 1;
+        weekdayStats[idx].revenue += o.total;
+      });
+      const maxWeekRevenue = Math.max(1, ...weekdayStats.map(d => d.revenue));
+
+      const statusColors = {
+        'Pending':'#c49a4a',
+        'Accepted':'#7c5cff',
+        'Preparing':'#f59e0b',
+        'Assigned':'#3b82f6',
+        'In Transit':'#14b8a6',
+        'Delivered':'#22c55e',
+        'Rejected':'#ef4444',
+        'Cancelled':'#9ca3af'
+      };
+      const paymentColors = {
+        'Cash':'#d97706',
+        'Card':'#8b5cf6',
+        'Online':'#0ea5e9'
+      };
+      const fallbackColors = ['#4b2e1f','#d9652b','#7c5cff','#14b8a6','#c49a4a','#ef4444'];
+
+      function buildDonut(entries, colorMap, totalLabel, centerValue) {
+        const total = entries.reduce((s, [,count]) => s + count, 0);
+        if (!total) {
+          return `
+            <div class="donut-wrap">
+              <div class="donut" style="background:conic-gradient(#f1e4d2 0 100%)">
+                <div class="donut-center"><strong>0</strong><span>${totalLabel}</span></div>
+              </div>
+              <div class="legend-list"><p style="margin:0;color:var(--muted)">No data yet.</p></div>
+            </div>`;
+        }
+        let start = 0;
+        const segments = entries.map(([name, count], idx) => {
+          const color = colorMap[name] || fallbackColors[idx % fallbackColors.length];
+          const pct = (count / total) * 100;
+          const seg = `${color} ${start}% ${start + pct}%`;
+          start += pct;
+          return { name, count, pct, color, seg };
+        });
+        return `
+          <div class="donut-wrap">
+            <div class="donut" style="background:conic-gradient(${segments.map(s => s.seg).join(',')})">
+              <div class="donut-center"><strong>${centerValue || total}</strong><span>${totalLabel}</span></div>
+            </div>
+            <div class="legend-list">
+              ${segments.map(s => `
+                <div class="legend-row">
+                  <span class="legend-dot" style="background:${s.color}"></span>
+                  <span class="name">${s.name}</span>
+                  <span class="count">${s.count}</span>
+                  <span class="pct">${Math.round(s.pct)}%</span>
+                </div>`).join('')}
+            </div>
+          </div>`;
+      }
+
+      const topItems = Object.entries(itemStats).sort((a,b)=>b[1].revenue-a[1].revenue).slice(0,5);
+      const paymentEntries = Object.entries(paymentCounts).sort((a,b)=>b[1]-a[1]);
+      const statusEntries = Object.entries(statusCounts).sort((a,b)=>b[1]-a[1]);
+
+      return `<div class="analytics-layout">
+        <h2 style="margin-bottom:0">Manager Analytics</h2>
 
         <div class="dash-grid">
-          <div class="dash-card"><div class="label">Total Revenue</div><div class="value">${money(revenue)}</div><div class="sub">All non-rejected orders</div></div>
-          <div class="dash-card"><div class="label">Average Order Value</div><div class="value">${money(avgOrder)}</div><div class="sub">${valid.length} valid orders</div></div>
-          <div class="dash-card"><div class="label">Top Revenue Item</div><div class="value" style="font-size:20px">${topRevenue ? topRevenue[0] : 'No data'}</div><div class="sub">${topRevenue ? money(topRevenue[1].revenue) : '0 MAD'}</div></div>
-          <div class="dash-card"><div class="label">Top Ordered Item</div><div class="value" style="font-size:20px">${topQty ? topQty[0] : 'No data'}</div><div class="sub">${topQty ? topQty[1].qty + ' item(s)' : '0 item'}</div></div>
+          <div class="dash-card"><div class="label">Total Revenue</div><div class="value">${money(revenue)}</div><div class="sub">From ${valid.length} valid orders</div></div>
+          <div class="dash-card"><div class="label">Average Order</div><div class="value">${money(avgOrder)}</div><div class="sub">Per valid order</div></div>
+          <div class="dash-card"><div class="label">Delivered Orders</div><div class="value">${delivered}</div><div class="sub">Completed successfully</div></div>
+          <div class="dash-card"><div class="label">Active Orders</div><div class="value">${active}</div><div class="sub">Still in progress</div></div>
         </div>
 
-        <div class="dash-grid">
-          <div class="dash-card"><div class="label">Active Orders</div><div class="value">${active}</div><div class="sub">Not delivered yet</div></div>
-          <div class="dash-card"><div class="label">Delivered Orders</div><div class="value">${delivered}</div><div class="sub">Completed delivery flow</div></div>
-          <div class="dash-card"><div class="label">Available Drivers</div><div class="value">${state.deliveryPeople.filter(d=>d.available).length}/${state.deliveryPeople.length}</div><div class="sub">Can be assigned now</div></div>
-          <div class="dash-card"><div class="label">Menu Availability</div><div class="value">${state.menu.filter(i=>i.available).length}/${state.menu.length}</div><div class="sub">Items currently orderable</div></div>
+        <div class="insight-strip">
+          <div class="insight-card">
+            <div class="eyebrow">Top revenue item</div>
+            <strong>${topRevenue ? topRevenue[0] : 'No data'}</strong>
+            <p>${topRevenue ? `${money(topRevenue[1].revenue)} generated` : 'No sales data yet.'}</p>
+          </div>
+          <div class="insight-card">
+            <div class="eyebrow">Best category</div>
+            <strong>${bestCategory ? bestCategory[0] : 'No data'}</strong>
+            <p>${bestCategory ? `${money(bestCategory[1].revenue)} · ${bestCategory[1].qty} item(s) sold` : 'No category data yet.'}</p>
+          </div>
+          <div class="insight-card">
+            <div class="eyebrow">Peak demand</div>
+            <strong>${peakHour ? `${peakHour[0]}:00–${peakHour[0]}:59` : 'No data'}</strong>
+            <p>${peakHour ? `${peakHour[1]} order(s) came in during the busiest hour.` : 'No time pattern available yet.'}</p>
+          </div>
         </div>
 
-        <div class="grid-2">
-          <div class="dashboard-section">
-            <h3>Category Revenue</h3>
+        <div class="analytics-grid-2">
+          <div class="chart-card">
+            <h3>Revenue by Day</h3>
+            <p class="chart-sub">A simple weekly view to spot stronger service days.</p>
+            <div class="week-chart">
+              ${weekdayStats.map(day => `
+                <div class="week-col">
+                  <div class="week-bar-wrap">
+                    <div class="week-bar" style="height:${Math.max(16, Math.round((day.revenue / maxWeekRevenue) * 170))}px"></div>
+                  </div>
+                  <div class="week-amount">${money(day.revenue)}</div>
+                  <div class="week-orders">${day.orders} order(s)</div>
+                  <div class="week-day">${day.label}</div>
+                </div>`).join('')}
+            </div>
+          </div>
+
+          <div class="donut-grid">
+            <div class="chart-card">
+              <h3>Order Status</h3>
+              <p class="chart-sub">Current pipeline and completed orders at a glance.</p>
+              ${buildDonut(statusEntries, statusColors, 'total orders', state.orders.length)}
+            </div>
+            <div class="chart-card">
+              <h3>Payment Mix</h3>
+              <p class="chart-sub">How customers are paying for their orders.</p>
+              ${buildDonut(paymentEntries, paymentColors, 'valid orders', valid.length)}
+            </div>
+          </div>
+        </div>
+
+        <div class="analytics-bottom">
+          <div class="chart-card">
+            <h3>Category Performance</h3>
+            <p class="chart-sub">Revenue contribution by category.</p>
             ${categoryRevenue.length ? categoryRevenue.map(([cat,data]) => `
               <div class="progress-row">
                 <div class="progress-head"><span>${cat}</span><strong>${money(data.revenue)}</strong></div>
                 <div class="progress-track"><div class="progress-fill" style="width:${Math.round((data.revenue/maxCatRevenue)*100)}%"></div></div>
                 <div class="stat-label">${data.qty} item(s) sold</div>
-              </div>`).join('') : '<p>No category revenue yet.</p>'}
+              </div>`).join('') : '<p style="color:var(--muted)">No category revenue yet.</p>'}
           </div>
 
-          <div class="dashboard-section">
-            <h3>Order Status Breakdown</h3>
-            ${Object.entries(statusCounts).map(([status,count]) => `
-              <div class="progress-row">
-                <div class="progress-head"><span>${status}</span><strong>${count}</strong></div>
-                <div class="progress-track"><div class="progress-fill" style="width:${Math.round((count/maxStatus)*100)}%"></div></div>
-              </div>`).join('') || '<p>No orders yet.</p>'}
-          </div>
-
-          <div class="dashboard-section">
-            <h3>Payment Split</h3>
-            ${Object.entries(paymentCounts).map(([payment,count]) => `<div class="mini-line"><span>${payment}</span><strong>${count} order(s)</strong></div>`).join('') || '<p>No payment data yet.</p>'}
-          </div>
-
-          <div class="dashboard-section">
-            <h3>Driver Performance</h3>
-            ${driverStats.map(d => `<div class="mini-line"><span>${d.name} ${d.available?'<span class="tag green">Available</span>':'<span class="tag red">Unavailable</span>'}</span><strong>${d.delivered}/${d.assigned} delivered · ${money(d.revenue)}</strong></div>`).join('')}
-          </div>
-
-          <div class="dashboard-section">
-            <h3>Peak Demand Times</h3>
-            ${peak.map(([hour,count]) => `<div class="mini-line"><span>${hour}:00–${hour}:59</span><strong>${count} order(s)</strong></div>`).join('') || '<p>No peak time data yet.</p>'}
-          </div>
-
-          <div class="dashboard-section">
-            <h3>Most Ordered Items</h3>
-            ${Object.entries(itemStats).sort((a,b)=>b[1].qty-a[1].qty).slice(0,5).map(([name,data]) => `<div class="mini-line"><span>${name}</span><strong>${data.qty} sold · ${money(data.revenue)}</strong></div>`).join('') || '<p>No item data yet.</p>'}
+          <div class="chart-card">
+            <h3>Top Items</h3>
+            <p class="chart-sub">Best-performing items by revenue.</p>
+            <div class="ranking-list">
+              ${topItems.length ? topItems.map(([name,data], idx) => `
+                <div class="ranking-row">
+                  <div>
+                    <strong>#${idx + 1} ${name}</strong>
+                    <span>${data.qty} sold</span>
+                  </div>
+                  <div class="ranking-value">${money(data.revenue)}</div>
+                </div>`).join('') : '<p style="color:var(--muted);margin:0">No item data yet.</p>'}
+            </div>
           </div>
         </div>
 
-        <div class="notice" style="margin-top:18px">Dashboard uses demo data stored locally in this browser.</div>`;
+        <div class="chart-card">
+          <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap">
+            <div>
+              <h3>Driver Performance</h3>
+              <p class="chart-sub">Assignments, deliveries, and revenue handled by each driver.</p>
+            </div>
+            ${bestDriver ? `<span class="chip-soft">Top driver: ${bestDriver.name}</span>` : ''}
+          </div>
+          <div class="driver-grid">
+            ${driverStats.map(d => `
+              <div class="driver-card">
+                <div class="driver-head">
+                  <strong>${d.name}</strong>
+                  ${d.available ? '<span class="tag green">Available</span>' : '<span class="tag red">Unavailable</span>'}
+                </div>
+                <div class="driver-stats">
+                  <div><strong>${d.assigned}</strong><span>assigned</span></div>
+                  <div><strong>${d.delivered}</strong><span>delivered</span></div>
+                  <div><strong>${money(d.revenue)}</strong><span>revenue</span></div>
+                </div>
+              </div>`).join('')}
+          </div>
+        </div>
+      </div>`;
     }
 
     function getPeakHours(orders) {
