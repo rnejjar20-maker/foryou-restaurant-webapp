@@ -2457,7 +2457,7 @@
   </div>
 
   <script>
-    const STORE_KEY = 'for_you_restaurant_demo_v26_logo_titles_home_tag_removed';
+    const STORE_KEY = 'for_you_restaurant_demo_v27_no_reset_demo_button';
     const MANAGER_PIN = '1234';
     const DELIVERY_PIN = '2222';
 
@@ -10313,7 +10313,6 @@ function renderCart() {
             </div>
             <div class="row">
               <button class="ghost" onclick="managerLoggedIn=false;renderManager()">Logout</button>
-              <button class="danger" onclick="resetDemo()">Reset Demo</button>
             </div>
           </div>
           ${managerTab==='orders' ? managerOrdersHtml() : managerTab==='menu' ? managerMenuHtml() : managerAnalyticsHtml()}
