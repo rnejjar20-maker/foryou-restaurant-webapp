@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>For You Restaurant Web App</title>
+  <title>For You Restaurant | Midnight Modern</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -1249,6 +1249,438 @@
       .menu-hero-content h3 { font-size: 30px; }
     }
 
+
+    /* Creative full redesign v2 */
+    :root {
+      --bg: #0e1118;
+      --bg-soft: #151b24;
+      --surface: rgba(16, 20, 30, 0.66);
+      --surface-strong: rgba(18, 23, 35, 0.82);
+      --card: rgba(250, 248, 244, 0.94);
+      --card-2: rgba(255, 252, 248, 0.90);
+      --dark: #16120f;
+      --muted: #6d655e;
+      --accent: #ff7a2f;
+      --accent2: #ffca6a;
+      --accent3: #6fe6cb;
+      --line: rgba(255,255,255,0.08);
+      --line-soft: rgba(55, 65, 81, 0.12);
+      --soft: rgba(255,255,255,0.08);
+      --shadow: 0 28px 60px rgba(0,0,0,0.28);
+      --shadow-soft: 0 12px 30px rgba(0,0,0,0.14);
+    }
+
+    body {
+      font-family: 'Inter', Arial, Helvetica, sans-serif;
+      color: #f8f6f1;
+      background:
+        radial-gradient(circle at 10% 12%, rgba(255,122,47,0.20), transparent 18%),
+        radial-gradient(circle at 88% 18%, rgba(111,230,203,0.13), transparent 18%),
+        radial-gradient(circle at 75% 80%, rgba(255,202,106,0.12), transparent 18%),
+        linear-gradient(180deg, #0e1118 0%, #111521 46%, #131926 100%);
+      min-height: 100vh;
+      position: relative;
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      width: 420px;
+      height: 420px;
+      border-radius: 50%;
+      filter: blur(90px);
+      opacity: 0.16;
+      pointer-events: none;
+      z-index: 0;
+    }
+    body::before {
+      background: #ff7a2f;
+      top: -120px;
+      right: -70px;
+    }
+    body::after {
+      background: #45d5b0;
+      left: -110px;
+      bottom: -140px;
+    }
+
+    header {
+      top: 14px;
+      margin: 0 auto;
+      width: min(1280px, calc(100% - 26px));
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(15, 19, 29, 0.68);
+      backdrop-filter: blur(18px);
+      border-radius: 24px;
+      box-shadow: 0 20px 40px rgba(0,0,0,.25);
+    }
+
+    .topbar {
+      max-width: none;
+      padding: 14px 18px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .brand {
+      color: #fff;
+      font-size: 22px;
+      letter-spacing: -0.05em;
+    }
+    .logo {
+      width: 42px;
+      height: 42px;
+      background: linear-gradient(135deg, #ff7a2f, #ffb34d);
+      color: #22150d;
+      box-shadow: 0 12px 25px rgba(255,122,47,.28);
+    }
+
+    nav button {
+      background: rgba(255,255,255,0.06);
+      color: rgba(255,255,255,0.88);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 14px;
+      padding: 10px 14px;
+      box-shadow: none;
+    }
+    nav button.active {
+      background: linear-gradient(135deg, #ff7a2f, #ff9f42);
+      color: #24170f;
+      border-color: transparent;
+      box-shadow: 0 10px 24px rgba(255,122,47,.26);
+    }
+    nav button:hover { background: rgba(255,255,255,0.11); }
+    nav button.active:hover { background: linear-gradient(135deg, #ff7a2f, #ff9f42); }
+
+    main {
+      position: relative;
+      z-index: 1;
+      max-width: 1260px;
+      padding: 48px 22px 70px;
+    }
+
+    .hero-card, .card, .chart-card, .dash-card, .insight-card, .hours-card, .hours-note,
+    .availability-panel, .availability-status, .availability-hero, .performance-card, .calendar-card,
+    .delivery-top, .delivery-order-card, .mgr-topbar, .mgr-order-card, .chat-box, .modal,
+    .category-card, .how-card, .status-card, .home-floating-card, .menu-helper-banner,
+    .driver-card, .quick-stat, .shift-card-clean, .ranking-row, .stat-box, .notice {
+      background: var(--card);
+      color: var(--dark);
+      border: 1px solid rgba(56, 47, 39, 0.06);
+      box-shadow: var(--shadow-soft);
+      border-radius: 26px;
+    }
+
+    h1, h2, h3, strong, .value, .stat-value, .dash-card .value, .order-id, .brand-title {
+      color: var(--dark);
+      letter-spacing: -0.05em;
+    }
+    p, .sub, .hint, .label, .staff-line, .week-day, .week-orders, .menu-item-ingredients,
+    .mgr-order-info, .hours-note p, .delivery-order-card p, .mgr-order-card p { color: var(--muted); }
+
+    button {
+      border-radius: 14px;
+      padding: 10px 16px;
+      font-weight: 800;
+      transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+    }
+    button:hover { transform: translateY(-1px); filter: saturate(1.03); }
+
+    .primary, .success {
+      background: linear-gradient(135deg, #ff7a2f, #ffb148);
+      color: #24170f;
+      box-shadow: 0 12px 24px rgba(255,122,47,.20);
+    }
+    .success { background: linear-gradient(135deg, #5ad8bb, #9ceacb); color: #11362d; }
+    .danger {
+      background: linear-gradient(135deg, #ff6767, #e64646);
+      color: white;
+      box-shadow: 0 12px 24px rgba(230,70,70,.16);
+    }
+    .secondary, .ghost {
+      background: rgba(255,255,255,0.78);
+      color: var(--dark);
+      border: 1px solid rgba(56,47,39,0.08);
+    }
+
+    .home-hero-new {
+      background:
+        radial-gradient(circle at 80% 12%, rgba(255,184,98,0.20), transparent 18%),
+        radial-gradient(circle at 95% 80%, rgba(111,230,203,0.16), transparent 18%),
+        linear-gradient(135deg, #111723 0%, #1a2030 35%, #23212d 72%, #312116 100%);
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 34px 70px rgba(0,0,0,0.30);
+      border-radius: 34px;
+      min-height: 500px;
+      padding: 42px;
+    }
+    .home-hero-new::before {
+      background: linear-gradient(90deg, rgba(11,13,20,0.86) 0%, rgba(11,13,20,0.62) 38%, rgba(11,13,20,0.18) 100%);
+    }
+    .home-hero-copy h1 {
+      color: #fff;
+      font-size: 62px;
+      line-height: 0.95;
+      max-width: 700px;
+    }
+    .home-hero-copy p {
+      color: rgba(255,255,255,0.82);
+      font-size: 18px;
+      max-width: 620px;
+    }
+    .home-hero-copy .tag {
+      background: rgba(255,255,255,0.10);
+      border: 1px solid rgba(255,255,255,0.14);
+      color: #fff;
+    }
+    .home-hero-visual {
+      background: linear-gradient(160deg, rgba(255,255,255,0.10), rgba(255,255,255,0.03));
+      border: 1px solid rgba(255,255,255,0.10);
+      box-shadow: 0 26px 50px rgba(0,0,0,.28);
+    }
+    .home-floating-card {
+      background: rgba(255,250,244,0.92);
+      border-radius: 24px;
+      box-shadow: 0 14px 30px rgba(0,0,0,.16);
+    }
+
+    .home-section-title {
+      color: #fff;
+      font-size: 34px;
+      margin: 34px 0 16px;
+    }
+
+    .category-card {
+      overflow: hidden;
+      min-height: 200px;
+      border-radius: 28px;
+      box-shadow: 0 18px 34px rgba(0,0,0,.18);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+    .category-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(10,10,12,0.03), rgba(10,10,12,0.0));
+      pointer-events: none;
+    }
+    .category-card::after {
+      background: linear-gradient(0deg, rgba(15,15,19,.86) 0%, rgba(15,15,19,.28) 56%, rgba(15,15,19,0.06) 100%);
+    }
+    .category-card-content h3 { color: #fff; font-size: 25px; }
+    .category-card-content span { color: rgba(255,255,255,0.84); }
+
+    .how-card, .status-card {
+      background: linear-gradient(180deg, rgba(255,253,249,0.95), rgba(250,246,240,0.92));
+      border-radius: 22px;
+    }
+    .status-card .dot { box-shadow: 0 0 0 5px rgba(0,0,0,0.03); }
+
+    .hero-card, .card { border-radius: 28px; }
+    .menu-hero {
+      border-radius: 30px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.06);
+      box-shadow: 0 24px 46px rgba(0,0,0,.24);
+    }
+    .menu-hero-overlay {
+      background: linear-gradient(90deg, rgba(10,12,16,0.88) 0%, rgba(10,12,16,0.54) 40%, rgba(10,12,16,0.08) 100%);
+    }
+    .menu-hero-content { padding: 34px; }
+    .menu-hero-content h3 {
+      color: #fff;
+      font-size: 38px;
+      margin-bottom: 8px;
+    }
+    .menu-hero-content p { color: rgba(255,255,255,0.82); }
+    .menu-helper-banner {
+      background: linear-gradient(135deg, #fff1bf, #ffe2a6);
+      color: #7c5710;
+      border: 1px solid rgba(157,112,25,0.16);
+    }
+
+    .category-btn {
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 16px;
+      backdrop-filter: blur(8px);
+    }
+    .category-btn.active {
+      background: linear-gradient(135deg, #ff7a2f, #ffb34d);
+      color: #25170f;
+      border-color: transparent;
+      box-shadow: 0 10px 22px rgba(255,122,47,.24);
+    }
+
+    .menu-item-simple, .order-card, .mgr-order-card, .delivery-order-card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.97), rgba(250,247,241,0.96));
+      border: 1px solid rgba(56,47,39,0.06);
+      box-shadow: 0 16px 34px rgba(0,0,0,.12);
+      border-radius: 24px;
+    }
+    .dish-img {
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.10);
+    }
+    .price {
+      color: #d75d25;
+      font-weight: 900;
+      font-size: 15px;
+      letter-spacing: -0.03em;
+    }
+    .chip, .chip-soft, .status-pill, .status-tag, .tag, .hero-kicker {
+      border-radius: 999px;
+      font-weight: 700;
+      border: 1px solid rgba(56,47,39,.08);
+    }
+    .chip { background: rgba(255,241,219,0.9); color: #7a5420; }
+    .chip-soft { background: rgba(226, 248, 239, 0.95); color: #126a55; }
+
+    .dash-card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(248,245,240,0.95));
+      border-radius: 24px;
+      box-shadow: 0 16px 30px rgba(0,0,0,.12);
+    }
+    .dash-card .value {
+      font-size: 34px;
+      color: #17120f;
+    }
+    .insight-card {
+      background: linear-gradient(135deg, rgba(255,255,255,0.97), rgba(255,245,233,0.92));
+      border-radius: 24px;
+    }
+    .chart-card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(248,244,238,0.95));
+      border-radius: 26px;
+    }
+    .progress-track {
+      background: rgba(239,229,219,0.96);
+      height: 12px;
+      border: 1px solid rgba(56,47,39,0.05);
+    }
+    .progress-fill {
+      background: linear-gradient(90deg, #ff7a2f, #ffd16d, #58d7ba);
+      box-shadow: 0 10px 18px rgba(255,122,47,.16);
+    }
+    .week-bar {
+      background: linear-gradient(180deg, #58d7ba 0%, #2cbfa2 26%, #ff7a2f 100%);
+      border-radius: 14px 14px 0 0;
+      box-shadow: 0 10px 18px rgba(17, 93, 79, 0.14);
+    }
+    .donut {
+      background: conic-gradient(#ff7a2f 0 42%, #58d7ba 42% 73%, #ffd06f 73% 100%);
+      box-shadow: inset 0 0 0 10px rgba(255,255,255,.16), 0 12px 20px rgba(0,0,0,.10);
+    }
+    .donut::after { background: rgba(255,255,255,0.97); }
+    .ranking-row, .driver-card, .availability-stat, .quick-stat, .shift-card-clean {
+      background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(248,244,238,0.95));
+    }
+
+    .mgr-topbar, .delivery-top {
+      background: linear-gradient(135deg, rgba(255,255,255,0.16), rgba(255,255,255,0.08));
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.10);
+      backdrop-filter: blur(16px);
+      box-shadow: 0 18px 36px rgba(0,0,0,.18);
+    }
+    .mgr-topbar *, .delivery-top *, .delivery-top p, .mgr-topbar p { color: inherit; }
+    .mgr-logo, .delivery-logo {
+      background: linear-gradient(135deg, rgba(255,255,255,.14), rgba(255,255,255,.06));
+      color: #fff;
+      border: 1px solid rgba(255,255,255,.12);
+    }
+    .mgr-tabs button, .delivery-tabs button {
+      color: rgba(255,255,255,0.76);
+      background: transparent;
+      border-radius: 12px;
+      border: none;
+      box-shadow: none;
+      padding: 10px 14px;
+    }
+    .mgr-tabs button.active, .delivery-tabs button.active {
+      background: rgba(255,255,255,0.14);
+      color: white;
+      border-bottom-color: transparent;
+    }
+
+    .availability-hero {
+      background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,244,232,0.92));
+    }
+    .calendar-card.clean {
+      background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(248,245,240,0.95));
+    }
+    .calendar-day.selected {
+      background: linear-gradient(135deg, #ff7a2f, #ffb34d);
+      color: #24170f;
+      box-shadow: 0 10px 18px rgba(255,122,47,.20);
+    }
+    .calendar-day.has-shift:not(.selected) {
+      background: rgba(88,215,186,0.12);
+      border-color: rgba(88,215,186,0.34);
+      color: #156d59;
+    }
+    .shift-row {
+      background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(249,245,239,0.92));
+      border-radius: 18px;
+    }
+
+    .input, .mgr-search, select, textarea {
+      background: rgba(255,255,255,0.92);
+      border: 1px solid rgba(56,47,39,0.10);
+      border-radius: 15px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.64);
+    }
+    .input:focus, .mgr-search:focus, select:focus, textarea:focus {
+      border-color: rgba(255,122,47,0.38);
+      box-shadow: 0 0 0 4px rgba(255,122,47,0.10);
+      outline: none;
+    }
+
+    .chat-box {
+      background: linear-gradient(180deg, rgba(255,255,255,0.97), rgba(248,245,240,0.95));
+      border-radius: 28px;
+    }
+    .msg { border-radius: 18px; box-shadow: 0 8px 18px rgba(0,0,0,.07); }
+    .user-msg {
+      background: linear-gradient(135deg, #ff7a2f, #ffb34d);
+      color: #24170f;
+    }
+    .bot-msg {
+      background: rgba(251,246,238,0.98);
+      color: var(--dark);
+    }
+
+    .hours-card { background: linear-gradient(180deg, rgba(255,255,255,0.97), rgba(252,248,242,0.94)); }
+    .hours-note { background: linear-gradient(135deg, rgba(255,255,255,0.96), rgba(255,244,225,0.92)); }
+    .hours-row.today {
+      background: linear-gradient(135deg, rgba(255,226,171,0.95), rgba(255,243,206,0.96));
+      border: 1px solid rgba(223,160,67,0.18);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.6);
+    }
+
+    .footer-note {
+      color: rgba(255,255,255,0.55);
+      border-top: 1px solid rgba(255,255,255,0.08);
+      margin-top: 26px;
+    }
+
+    @media (max-width: 1000px) {
+      header { width: calc(100% - 16px); top: 8px; }
+      main { padding-top: 32px; }
+      .home-hero-new { grid-template-columns: 1fr; min-height: auto; }
+      .home-hero-copy h1 { font-size: 50px; }
+      .home-section-title { font-size: 28px; }
+    }
+    @media (max-width: 640px) {
+      .home-hero-copy h1 { font-size: 40px; }
+      .menu-hero-content h3 { font-size: 30px; }
+      .category-btn { width: auto; }
+      nav { justify-content: flex-start; }
+    }
+
   </style>
 </head>
 <body>
@@ -1275,7 +1707,7 @@
   </div>
 
   <script>
-    const STORE_KEY = 'for_you_restaurant_demo_v13_modern_interface';
+    const STORE_KEY = 'for_you_restaurant_demo_v14_midnight_creative';
     const MANAGER_PIN = '1234';
     const DELIVERY_PIN = '2222';
 
