@@ -360,6 +360,88 @@
       margin-bottom: 3px;
     }
 
+    .hours-section {
+      margin: 24px 0 8px;
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .hours-card,
+    .hours-note {
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      padding: 24px;
+    }
+
+    .hours-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .hours-card-header h3,
+    .hours-note h3 {
+      margin: 0;
+    }
+
+    .hours-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .hours-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: center;
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: #fbf6ef;
+      border: 1px solid #f0dcc3;
+    }
+
+    .hours-row.today {
+      background: linear-gradient(135deg, #fff0db, #f8e2c2);
+      border-color: #e4c28f;
+    }
+
+    .hours-day {
+      font-weight: 800;
+      color: var(--dark);
+    }
+
+    .hours-time {
+      font-weight: 700;
+      color: #7a4b1a;
+      white-space: nowrap;
+    }
+
+    .hours-note {
+      background: linear-gradient(135deg, #fff8ef 0%, #f5ead9 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .hours-note ul {
+      margin: 12px 0 0;
+      padding-left: 18px;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    @media (max-width: 900px) {
+      .hours-section {
+        grid-template-columns: 1fr;
+      }
+    }
+
     @media (max-width: 900px) {
       .home-hero-new {
         grid-template-columns: 1fr;
@@ -785,7 +867,7 @@
   </div>
 
   <script>
-    const STORE_KEY = 'for_you_restaurant_demo_v10_homepage_sushi_combined';
+    const STORE_KEY = 'for_you_restaurant_demo_v11_home_hours';
     const MANAGER_PIN = '1234';
     const DELIVERY_PIN = '2222';
 
@@ -2291,10 +2373,17 @@
     }
 
     function renderHome() {
-      const delivered = state.orders.filter(o => o.status === 'Delivered').length;
-      const activeOrders = state.orders.filter(o => o.status !== 'Delivered' && o.status !== 'Rejected').length;
-      const availableDrivers = state.deliveryPeople.filter(d => d.available).length;
       const heroImg = CATEGORY_HERO_IMAGES['Sandwiches'] || CATEGORY_HERO_IMAGES['Loaded Fries'] || '';
+      const openingHours = [
+        ['Saturday', '3PM–2AM'],
+        ['Sunday', '3PM–1AM'],
+        ['Monday', '3PM–12:30AM'],
+        ['Tuesday', '3PM–12:30AM'],
+        ['Wednesday', '3PM–12:30AM'],
+        ['Thursday', '3PM–12:30AM'],
+        ['Friday', '3PM–2AM']
+      ];
+      const todayName = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][new Date().getDay()];
       byId('home').innerHTML = `
         <section class="home-hero-new">
           <div class="home-hero-copy">
@@ -2317,12 +2406,35 @@
           </div>
         </section>
 
-        <div class="status-strip">
-          <div class="status-card"><strong>${state.menu.length}</strong><span>Menu items</span></div>
-          <div class="status-card"><strong>${activeOrders}</strong><span>Active orders</span></div>
-          <div class="status-card"><strong>${availableDrivers}</strong><span>Available delivery people</span></div>
-          <div class="status-card"><strong>${delivered}</strong><span>Delivered orders</span></div>
-        </div>
+        <section class="hours-section">
+          <div class="hours-card">
+            <div class="hours-card-header">
+              <div>
+                <span class="tag">Opening hours</span>
+                <h3>Come by or order during our service hours</h3>
+              </div>
+              <span class="tag green">${todayName}</span>
+            </div>
+            <div class="hours-list">
+              ${openingHours.map(([day, time]) => `
+                <div class="hours-row ${day === todayName ? 'today' : ''}">
+                  <span class="hours-day">${day}</span>
+                  <span class="hours-time">${time}</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+          <div class="hours-note">
+            <span class="tag">For You schedule</span>
+            <h3>Late lunch to late-night cravings</h3>
+            <p>Our hours are designed for both dine-in and delivery orders, with extended service on the weekend.</p>
+            <ul>
+              <li>Weekend closing time: <strong>2AM</strong></li>
+              <li>Sunday closing time: <strong>1AM</strong></li>
+              <li>Weekday service runs until <strong>12:30AM</strong></li>
+            </ul>
+          </div>
+        </section>
 
         <div class="home-section-title">
           <div>
