@@ -2369,6 +2369,25 @@
       color: rgba(255,247,236,0.78);
     }
 
+    /* Final global page title readability polish */
+    main > section > h2,
+    #menu > h2,
+    #cart > h2,
+    #track > h2,
+    #assistant > h2,
+    #manager > h2 {
+      color: #fff7ec !important;
+      text-shadow: 0 2px 16px rgba(0,0,0,0.52);
+      letter-spacing: -0.03em;
+    }
+    #menu > p,
+    #cart > p,
+    #track > p,
+    #assistant > p,
+    #manager > p {
+      color: rgba(255,247,236,0.76) !important;
+    }
+
   </style>
 </head>
 <body>
@@ -2395,7 +2414,7 @@
   </div>
 
   <script>
-    const STORE_KEY = 'for_you_restaurant_demo_v24_delivery_logout_titles_polish';
+    const STORE_KEY = 'for_you_restaurant_demo_v25_global_titles_chihab_ai';
     const MANAGER_PIN = '1234';
     const DELIVERY_PIN = '2222';
 
@@ -9859,7 +9878,7 @@ function renderCart() {
 
     function renderAssistant() {
       byId('assistant').innerHTML = `
-        <h2>Smart Menu Assistant</h2>
+        <h2>Chihab AI</h2>
         <p>Ask naturally. The assistant adapts to what the customer likes, dislikes, budget, ingredients, menu availability, and order analytics.</p>
         <div class="notice">Prototype mode: recommendations are generated from the restaurant menu and analytics data stored in this website. The chat resets when the website is reopened.</div>
         <div class="card">
