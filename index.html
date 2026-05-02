@@ -1681,6 +1681,192 @@
       nav { justify-content: flex-start; }
     }
 
+    /* Menu cards redesigned to look cleaner without item photos */
+    .menu-grid-simple {
+      align-items: stretch;
+    }
+    .menu-grid-simple .menu-item-simple {
+      gap: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+    .menu-card-visual {
+      position: relative;
+      min-height: 178px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+      isolation: isolate;
+    }
+    .menu-card-visual::before,
+    .menu-card-visual::after {
+      content: "";
+      position: absolute;
+      border-radius: 999px;
+      pointer-events: none;
+      z-index: -1;
+      opacity: 0.55;
+    }
+    .menu-card-visual::before {
+      width: 180px;
+      height: 180px;
+      right: -30px;
+      top: -30px;
+      background: rgba(255,255,255,0.18);
+      filter: blur(4px);
+    }
+    .menu-card-visual::after {
+      width: 150px;
+      height: 150px;
+      left: -25px;
+      bottom: -55px;
+      background: rgba(255,255,255,0.12);
+    }
+    .menu-card-visual.tone-fries { background: linear-gradient(135deg, #fff3da 0%, #ffd08e 100%); }
+    .menu-card-visual.tone-sandwich { background: linear-gradient(135deg, #ffe8de 0%, #ffc3a0 100%); }
+    .menu-card-visual.tone-combos { background: linear-gradient(135deg, #e3f5ff 0%, #b8d9ff 100%); }
+    .menu-card-visual.tone-sides { background: linear-gradient(135deg, #ece7ff 0%, #d5cafc 100%); }
+    .menu-card-visual.tone-sweet { background: linear-gradient(135deg, #ffe7f3 0%, #f7c7df 100%); }
+    .menu-card-visual.tone-sushi { background: linear-gradient(135deg, #e6f4ff 0%, #b9d8ff 100%); }
+    .menu-card-visual.tone-drinks { background: linear-gradient(135deg, #efe7dc 0%, #dcc09a 100%); }
+    .menu-card-visual.tone-bowls { background: linear-gradient(135deg, #e4fbf0 0%, #b7eccd 100%); }
+    .menu-card-topline {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: flex-start;
+    }
+    .menu-card-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      align-self: flex-start;
+      background: rgba(255,255,255,0.68);
+      color: #3a2c23;
+      border: 1px solid rgba(56,47,39,0.08);
+      border-radius: 999px;
+      padding: 7px 12px;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      backdrop-filter: blur(8px);
+    }
+    .menu-card-price-top {
+      font-size: 24px;
+      font-weight: 900;
+      color: #8f3c19;
+      letter-spacing: -0.05em;
+      white-space: nowrap;
+    }
+    .menu-card-main {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 14px;
+    }
+    .menu-card-main h3 {
+      margin: 0;
+      font-size: 30px;
+      line-height: 1;
+      max-width: 70%;
+      color: #17120f;
+    }
+    .menu-card-monogram {
+      width: 74px;
+      height: 74px;
+      border-radius: 24px;
+      display: grid;
+      place-items: center;
+      background: rgba(255,255,255,0.70);
+      border: 1px solid rgba(56,47,39,0.08);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.72);
+      font-size: 28px;
+      font-weight: 900;
+      color: #17120f;
+      flex-shrink: 0;
+    }
+    .menu-card-body {
+      padding: 18px 20px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .menu-meta-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .menu-status-chip,
+    .menu-prep-chip,
+    .menu-note-chip {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 7px 11px;
+      font-size: 12px;
+      font-weight: 700;
+      border: 1px solid rgba(56,47,39,0.08);
+    }
+    .menu-prep-chip { background: #f4ece0; color: #7a5c36; }
+    .menu-status-chip.ok { background: #dff7ee; color: #0f7b60; }
+    .menu-status-chip.off { background: #ffe6e6; color: #b54444; }
+    .menu-note-chip { background: #f4f1ff; color: #5c55a0; }
+    .menu-card-summary {
+      margin: 0;
+      min-height: 46px;
+      font-size: 15px;
+      line-height: 1.5;
+      color: #6c655d;
+    }
+    .menu-card-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: auto;
+    }
+    .menu-card-actions button {
+      flex: 1 1 0;
+      min-width: 130px;
+    }
+    .modal-detail-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+      margin-bottom: 14px;
+    }
+    .modal-detail-price {
+      font-size: 26px;
+      font-weight: 900;
+      color: #d75d25;
+      white-space: nowrap;
+    }
+    .ingredient-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 6px;
+    }
+    .ingredient-pill {
+      background: #f7f1e7;
+      color: #5b5148;
+      border: 1px solid rgba(56,47,39,0.08);
+      border-radius: 999px;
+      padding: 7px 11px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    @media (max-width: 700px) {
+      .menu-card-main h3 { max-width: 100%; font-size: 26px; }
+      .menu-card-monogram { width: 60px; height: 60px; border-radius: 18px; font-size: 22px; }
+      .menu-card-price-top { font-size: 22px; }
+      .menu-card-actions button { min-width: 100%; }
+    }
+
   </style>
 </head>
 <body>
@@ -3359,7 +3545,7 @@ function renderMenu() {
 
       byId('menu').innerHTML = `
         <h2>Our Menu</h2>
-        <p>Browse dishes, check details, and add available items to the cart.</p>
+        <p>Browse dishes, keep the menu clean, and open item details only when you want the full ingredients.</p>
         <div class="toolbar">
           <input class="input" placeholder="Search for burgers, sushi, drinks..." value="${escapeHtml(searchText)}" oninput="searchText=this.value; menuPage=1; renderMenu()" />
           ${categories.map(c => `<button class="category-btn secondary ${menuFilter === c ? 'active' : ''}" onclick="menuFilter='${c}'; menuPage=1; renderMenu()">${c}</button>`).join('')}
@@ -3378,23 +3564,64 @@ function renderMenu() {
       `;
     }
 
+    function menuTone(category) {
+      const c = (category || '').toLowerCase();
+      if (c.includes('fries')) return 'tone-fries';
+      if (c.includes('sandwich') || c.includes('burger')) return 'tone-sandwich';
+      if (c.includes('combo') || c.includes('box')) return 'tone-combos';
+      if (c.includes('sides')) return 'tone-sides';
+      if (c.includes('dessert') || c.includes('sundae') || c.includes('mac')) return 'tone-sweet';
+      if (c.includes('drink') || c.includes('coffee')) return 'tone-drinks';
+      if (c.includes('bowl')) return 'tone-bowls';
+      return 'tone-sushi';
+    }
+
+    function menuMonogram(name) {
+      return (name || '').split(/\s+/).filter(Boolean).slice(0, 2).map(x => x[0]).join('').toUpperCase();
+    }
+
+    function compactSummary(item) {
+      const text = item.desc || '';
+      if (text.length <= 84) return text;
+      return text.slice(0, 81).trim().replace(/[,.!?;:]+$/, '') + '...';
+    }
+
+    function visualNote(item) {
+      const c = (item.category || '').toLowerCase();
+      if (c.includes('sushi')) return 'Fresh selection';
+      if (c.includes('fries')) return 'Signature pick';
+      if (c.includes('sandwich')) return 'Best seller';
+      if (c.includes('drink')) return 'Refreshing';
+      if (c.includes('dessert') || c.includes('sundae')) return 'Sweet finish';
+      if (c.includes('combo')) return 'Great value';
+      return 'Chef choice';
+    }
+
     function dishCard(item) {
       const unavailable = !item.available;
       return `
         <div class="card menu-item-simple">
-          <div class="dish-meta">
-            <div>
-              <div class="menu-item-category">${item.category}</div>
-              <h3>${item.name}</h3>
+          <div class="menu-card-visual ${menuTone(item.category)}">
+            <div class="menu-card-topline">
+              <span class="menu-card-label">${item.category}</span>
+              <span class="menu-card-price-top">${money(item.price)}</span>
             </div>
-            <span class="price">${money(item.price)}</span>
+            <div class="menu-card-main">
+              <h3>${item.name}</h3>
+              <div class="menu-card-monogram">${menuMonogram(item.name)}</div>
+            </div>
           </div>
-          <div class="row"><span class="tag">${item.prep}</span><span class="tag ${item.available ? 'green' : 'red'}">${item.available ? 'Available' : 'Unavailable'}</span></div>
-          <p>${item.desc}</p>
-          <div class="menu-item-ingredients"><strong>Ingredients:</strong> ${item.ingredients.join(', ')}</div>
-          <div class="row">
-            <button class="secondary" onclick="openItem('${item.id}')">View Details</button>
-            <button class="primary ${unavailable ? 'disabled' : ''}" onclick="addToCart('${item.id}')">Add to Cart</button>
+          <div class="menu-card-body">
+            <div class="menu-meta-row">
+              <span class="menu-prep-chip">${item.prep}</span>
+              <span class="menu-status-chip ${item.available ? 'ok' : 'off'}">${item.available ? 'Available' : 'Unavailable'}</span>
+              <span class="menu-note-chip">${visualNote(item)}</span>
+            </div>
+            <p class="menu-card-summary">${compactSummary(item)}</p>
+            <div class="menu-card-actions">
+              <button class="secondary" onclick="openItem('${item.id}')">View Details</button>
+              <button class="primary ${unavailable ? 'disabled' : ''}" onclick="addToCart('${item.id}')">Add to Cart</button>
+            </div>
           </div>
         </div>
       `;
@@ -3403,13 +3630,21 @@ function renderMenu() {
     function openItem(id) {
       const item = getMenuItem(id);
       showModal(`
-        <h2>${item.name}</h2>
+        <div class="modal-detail-head">
+          <div>
+            <div class="menu-item-category">${item.category}</div>
+            <h2 style="margin:4px 0 0">${item.name}</h2>
+          </div>
+          <div class="modal-detail-price">${money(item.price)}</div>
+        </div>
         <p>${item.desc}</p>
-        <div class="mini-line"><strong>Price</strong><span>${money(item.price)}</span></div>
         <div class="mini-line"><strong>Preparation time</strong><span>${item.prep}</span></div>
-        <div class="mini-line"><strong>Ingredients</strong><span>${item.ingredients.join(', ')}</span></div>
         <div class="mini-line"><strong>Availability</strong><span>${item.available ? 'Available' : 'Unavailable'}</span></div>
-        <div class="row" style="margin-top:16px">
+        <div style="margin-top:14px">
+          <strong>Ingredients</strong>
+          <div class="ingredient-pills">${item.ingredients.map(x => `<span class="ingredient-pill">${escapeHtml(x)}</span>`).join('')}</div>
+        </div>
+        <div class="row" style="margin-top:18px">
           <button class="primary ${item.available ? '' : 'disabled'}" onclick="addToCart('${item.id}'); closeModal()">Add to Cart</button>
           <button class="secondary" onclick="closeModal()">Close</button>
         </div>
