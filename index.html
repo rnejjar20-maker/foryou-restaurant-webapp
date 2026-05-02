@@ -2218,6 +2218,58 @@
       transform: translateY(-1px);
     }
 
+    .driver-location-panel {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 14px 0 18px;
+      padding: 14px 16px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: #fff;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 14px 28px rgba(0,0,0,0.14);
+    }
+    .driver-location-panel strong { color: #fff; }
+    .driver-location-panel span { color: rgba(255,255,255,0.72); font-size: 13px; }
+    .driver-location-panel .secondary { background: rgba(255,255,255,0.92); }
+    .nav-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+    .nav-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 9px 12px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #5ad8bb, #9ceacb);
+      color: #11362d !important;
+      font-size: 12px;
+      font-weight: 900;
+      text-decoration: none;
+      border: 1px solid rgba(17,54,45,0.10);
+      white-space: nowrap;
+      box-shadow: 0 10px 20px rgba(22,133,106,0.16);
+    }
+    .nav-button.secondary-nav {
+      background: linear-gradient(135deg, #ff7a2f, #ffb34d);
+      color: #24170f !important;
+    }
+    .nav-note {
+      display: block;
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
   </style>
 </head>
 <body>
@@ -2244,7 +2296,7 @@
   </div>
 
   <script>
-    const STORE_KEY = 'for_you_restaurant_demo_v20_gps_checkout';
+    const STORE_KEY = 'for_you_restaurant_demo_v21_delivery_navigation_gps';
     const MANAGER_PIN = '1234';
     const DELIVERY_PIN = '2222';
 
@@ -9467,11 +9519,63 @@ function renderMenu() {
       return `<a class="maps-link" href="${url}" target="_blank" rel="noopener">${label}</a>`;
     }
 
+    function directionsUrl(customerLocation, driverLocation = null) {
+      if (!customerLocation || customerLocation.lat == null || customerLocation.lng == null) return '';
+      const destination = `${customerLocation.lat},${customerLocation.lng}`;
+      if (driverLocation && driverLocation.lat != null && driverLocation.lng != null) {
+        const origin = `${driverLocation.lat},${driverLocation.lng}`;
+        return `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&travelmode=driving`;
+      }
+      return `https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=driving`;
+    }
+
+    function directionsLinkHtml(customerLocation, driverLocation = null, label = 'Start navigation') {
+      const url = directionsUrl(customerLocation, driverLocation);
+      if (!url) return '';
+      return `<a class="nav-button secondary-nav" href="${url}" target="_blank" rel="noopener">${label}</a>`;
+    }
+
+    function driverLocationStatus(driver) {
+      if (!driver || !driver.location) return 'Driver GPS not saved yet. Click “Save my current location” before starting delivery.';
+      const loc = driver.location;
+      const accuracy = loc.accuracy ? ` · accuracy ~${Math.round(loc.accuracy)}m` : '';
+      return `Driver GPS saved: ${Number(loc.lat).toFixed(5)}, ${Number(loc.lng).toFixed(5)}${accuracy}`;
+    }
+
+    function saveDriverCurrentLocation(driverId) {
+      const status = byId('driverGpsStatus');
+      if (!navigator.geolocation) {
+        if (status) status.textContent = 'Location is not supported by this browser.';
+        return;
+      }
+      if (status) status.textContent = 'Requesting permission and saving your current delivery location...';
+      navigator.geolocation.getCurrentPosition(
+        pos => {
+          const driver = state.deliveryPeople.find(d => d.id === driverId);
+          if (!driver) return;
+          driver.location = {
+            lat: Number(pos.coords.latitude.toFixed(6)),
+            lng: Number(pos.coords.longitude.toFixed(6)),
+            accuracy: pos.coords.accuracy || null,
+            capturedAt: new Date().toISOString()
+          };
+          saveState();
+          renderDelivery();
+        },
+        err => {
+          if (status) status.textContent = err.code === 1
+            ? 'Permission denied. Allow location access to save the driver location.'
+            : 'Could not detect driver location. Try again.';
+        },
+        { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 }
+      );
+    }
+
     function customerLocationLine(customer) {
       if (!customer || !customer.location) return '';
       const loc = customer.location;
       const accuracy = loc.accuracy ? ` · accuracy ~${Math.round(loc.accuracy)}m` : '';
-      return `<div class="mini-line"><strong>GPS location</strong><span>${mapsLinkHtml(loc)}<br><small style="color:var(--muted)">${Number(loc.lat).toFixed(5)}, ${Number(loc.lng).toFixed(5)}${accuracy}</small></span></div>`;
+      return `<div class="mini-line"><strong>Customer GPS</strong><span>${mapsLinkHtml(loc, 'Open customer pin')}<br><small style="color:var(--muted)">${Number(loc.lat).toFixed(5)}, ${Number(loc.lng).toFixed(5)}${accuracy}</small></span></div>`;
     }
 
     function useCurrentLocation() {
@@ -10804,6 +10908,13 @@ function renderDelivery() {
         return rank(a.status) - rank(b.status);
       });
       return `
+        <div class="driver-location-panel">
+          <div>
+            <strong>Delivery navigation</strong><br>
+            <span id="driverGpsStatus">${driverLocationStatus(driver)}</span>
+          </div>
+          <button class="secondary" onclick="saveDriverCurrentLocation('${driver.id}')">Save my current location</button>
+        </div>
         <div class="delivery-title-row"><h2 style="margin:0">My Orders</h2><span class="order-count">${sorted.length} orders</span></div>
         ${sorted.map(o => deliveryOrderCard(o, driver)).join('') || '<div class="delivery-order-card"><p>No orders assigned to you right now.</p></div>'}
         <div class="delivery-legend">
@@ -10851,7 +10962,10 @@ function renderDelivery() {
             </div>
             <strong>${money(o.total)}</strong>
           </div>
-          <div class="delivery-actions">${actionButtons}</div>
+          <div class="delivery-actions">
+            ${actionButtons}
+            ${o.customer.location ? `<div class="nav-actions">${directionsLinkHtml(o.customer.location, driver.location, driver.location ? 'Navigate from my GPS' : 'Navigate to customer')}${mapsLinkHtml(o.customer.location, 'View customer map')}</div><span class="nav-note">${driver.location ? 'Route uses the saved driver GPS as the starting point.' : 'Save your current location first for a route from your exact position.'}</span>` : '<span class="nav-note">No customer GPS saved for this order.</span>'}
+          </div>
         </div>`;
     }
 
@@ -10866,6 +10980,7 @@ function renderDelivery() {
         ${customerLocationLine(o.customer)}
         <div class="mini-line"><strong>Items</strong><span>${o.items.map(i => `${i.qty}x ${i.name}`).join(', ')}</span></div>
         <div class="mini-line"><strong>Payment</strong><span>${o.payment}</span></div>
+        ${o.customer.location ? `<div class="mini-line"><strong>Driver route</strong><span>${directionsLinkHtml(o.customer.location, (state.deliveryPeople.find(d=>d.id===deliveryPersonId)||{}).location, 'Start navigation to customer')}</span></div>` : ''}
         <h3>Total: ${money(o.total)}</h3>
         <button class="secondary" onclick="closeModal()">Close</button>`);
     }
@@ -10877,6 +10992,10 @@ function renderDelivery() {
       // Ensure status is Out for delivery when driver accepts
       if (o.status === 'Assigned to delivery') o.status = 'Out for delivery';
       saveState(); renderAll();
+      const driver = state.deliveryPeople.find(d => d.id === deliveryPersonId);
+      if (o.customer.location && !driver?.location) {
+        setTimeout(() => alert('Order accepted. Save your current location in the delivery navigation panel to start a route from your exact position.'), 100);
+      }
     }
 
     function rejectDeliveryOrder(id) {
