@@ -2202,7 +2202,7 @@
   </div>
 
   <script>
-    const STORE_KEY = 'for_you_restaurant_demo_v18_global_analytics_scope';
+    const STORE_KEY = 'for_you_restaurant_demo_v19_clean_scope_controls';
     const MANAGER_PIN = '1234';
     const DELIVERY_PIN = '2222';
 
@@ -10079,24 +10079,30 @@ function renderMenu() {
         <div class="analytics-control-panel">
           <div>
             <h3>Interactive analytics timeline</h3>
-            <p>Choose a scope. Everything below updates together: KPI cards, charts, category performance, top items, and driver performance.</p>
+            <p>Choose a scope. Controls appear only when needed, and everything below updates together.</p>
             <div class="scope-switch">
               <button class="scope-pill ${analyticsScope === 'all' ? 'active' : ''}" onclick="analyticsScope='all'; renderManager()">All Data</button>
               <button class="scope-pill ${analyticsScope === 'month' ? 'active' : ''}" onclick="analyticsScope='month'; renderManager()">Selected Month</button>
               <button class="scope-pill ${analyticsScope === 'week' ? 'active' : ''}" onclick="analyticsScope='week'; renderManager()">Selected Week</button>
             </div>
           </div>
-          <div class="analytics-control-group">
-            <select onchange="analyticsWeekStart=this.value; analyticsScope='week'; renderManager()">
-              ${weekStarts.map(w => {
-                const key = isoDate(w);
-                return `<option value="${key}" ${key === analyticsWeekStart ? 'selected' : ''}>${formatShort(w)} – ${formatShort(addDays(w,6))}</option>`;
-              }).join('')}
-            </select>
-            <select onchange="analyticsMonth=this.value; analyticsScope='month'; renderManager()">
-              ${monthKeys.map(m => `<option value="${m}" ${m === analyticsMonth ? 'selected' : ''}>${formatMonth(m)}</option>`).join('')}
-            </select>
-          </div>
+          ${analyticsScope === 'month' ? `
+            <div class="analytics-control-group">
+              <select onchange="analyticsMonth=this.value; analyticsScope='month'; renderManager()">
+                ${monthKeys.map(m => `<option value="${m}" ${m === analyticsMonth ? 'selected' : ''}>${formatMonth(m)}</option>`).join('')}
+              </select>
+            </div>
+          ` : ''}
+          ${analyticsScope === 'week' ? `
+            <div class="analytics-control-group">
+              <select onchange="analyticsWeekStart=this.value; analyticsScope='week'; renderManager()">
+                ${weekStarts.map(w => {
+                  const key = isoDate(w);
+                  return `<option value="${key}" ${key === analyticsWeekStart ? 'selected' : ''}>${formatShort(w)} – ${formatShort(addDays(w,6))}</option>`;
+                }).join('')}
+              </select>
+            </div>
+          ` : ''}
         </div>
 
         <div class="scope-banner">
