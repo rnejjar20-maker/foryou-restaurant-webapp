@@ -2340,6 +2340,35 @@
       color: #b91c1c;
     }
 
+    /* Final delivery page readability polish */
+    .delivery-logout-btn {
+      background: linear-gradient(135deg, #ef4444, #ff7a7a) !important;
+      color: #fff !important;
+      border: 1px solid rgba(255,255,255,0.18) !important;
+      box-shadow: 0 12px 24px rgba(239,68,68,0.22) !important;
+      font-weight: 900 !important;
+    }
+    .delivery-logout-btn:hover {
+      filter: brightness(1.04);
+      transform: translateY(-1px);
+    }
+    .delivery-shell h2,
+    .delivery-shell h3,
+    .delivery-title-row h2 {
+      color: #fff7ec !important;
+      text-shadow: 0 2px 14px rgba(0,0,0,0.45);
+    }
+    .delivery-title-row .order-count {
+      background: rgba(255,255,255,0.14) !important;
+      color: #ffe9c7 !important;
+      border-color: rgba(255,255,255,0.18) !important;
+    }
+    .delivery-shell > p,
+    .delivery-shell .chart-sub,
+    .delivery-shell .stat-label {
+      color: rgba(255,247,236,0.78);
+    }
+
   </style>
 </head>
 <body>
@@ -2366,7 +2395,7 @@
   </div>
 
   <script>
-    const STORE_KEY = 'for_you_restaurant_demo_v23_delivery_select_progress_steps';
+    const STORE_KEY = 'for_you_restaurant_demo_v24_delivery_logout_titles_polish';
     const MANAGER_PIN = '1234';
     const DELIVERY_PIN = '2222';
 
@@ -10963,8 +10992,7 @@ function renderDelivery() {
             </div>
             <div class="row">
               <select class="input" style="width:190px" onchange="deliveryPersonId=this.value; renderDelivery()">${state.deliveryPeople.map(d => `<option value="${d.id}" ${deliveryPersonId === d.id ? 'selected' : ''}>${d.name}</option>`).join('')}</select>
-              <div class="profile-pill">${currentDriver.name ? currentDriver.name[0] : 'P'}</div>
-              <button class="ghost" onclick="deliveryLoggedIn=false; renderDelivery()">Logout</button>
+              <button class="delivery-logout-btn" onclick="deliveryLoggedIn=false; renderDelivery()">Logout</button>
             </div>
           </div>
           ${deliveryTab === 'orders' ? deliveryOrdersPage(currentDriver) : deliveryAvailabilityPage(currentDriver)}
