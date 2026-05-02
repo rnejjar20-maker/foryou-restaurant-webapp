@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>For You Restaurant Web App</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #fff8ef;
@@ -890,6 +893,362 @@
     @media(max-width:900px){.availability-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.availability-hero{flex-direction:column;align-items:stretch}.availability-status{min-width:0}}
     @media(max-width:560px){.availability-stats{grid-template-columns:1fr}.shift-card-clean{grid-template-columns:1fr}.shift-hours{white-space:normal}}
 
+
+    /* Modern interface refresh */
+    :root {
+      --bg: #f7efe5;
+      --card: rgba(255,255,255,0.88);
+      --dark: #1e130d;
+      --muted: #726154;
+      --accent: #d6632d;
+      --accent2: #efb86b;
+      --green: #16856a;
+      --red: #c64b47;
+      --line: rgba(123, 92, 69, 0.16);
+      --soft: #fff3e2;
+      --shadow: 0 20px 45px rgba(63, 35, 19, 0.10);
+      --shadow-soft: 0 10px 24px rgba(63, 35, 19, 0.07);
+      --glass: rgba(255,255,255,0.72);
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', Arial, Helvetica, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(239,184,107,0.25), transparent 28%),
+        radial-gradient(circle at top right, rgba(214,99,45,0.10), transparent 24%),
+        linear-gradient(180deg, #fbf7f1 0%, #f7efe5 48%, #f4eadf 100%);
+      color: var(--dark);
+    }
+
+    button, input, select, textarea { font-family: 'Inter', Arial, Helvetica, sans-serif; }
+
+    button {
+      transition: transform .18s ease, box-shadow .18s ease, background .18s ease, border-color .18s ease, color .18s ease;
+      box-shadow: none;
+    }
+    button:hover { transform: translateY(-1px); }
+    button:active { transform: translateY(0); }
+
+    .primary {
+      background: linear-gradient(135deg, #df6c34 0%, #c85422 100%);
+      color: white;
+      box-shadow: 0 10px 22px rgba(214,99,45,0.26);
+    }
+    .secondary, .ghost {
+      background: rgba(255,255,255,0.88);
+      border: 1px solid rgba(123,92,69,0.16);
+      color: var(--dark);
+      backdrop-filter: blur(12px);
+    }
+    .danger { background: linear-gradient(135deg, #d25a56, #bb3e3a); color: #fff; box-shadow: 0 10px 20px rgba(198,75,71,.22); }
+    .success { background: linear-gradient(135deg, #1d9779, #15745e); color: #fff; box-shadow: 0 10px 20px rgba(22,133,106,.20); }
+
+    header {
+      background: rgba(251, 246, 239, 0.72);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid rgba(123,92,69,0.14);
+      box-shadow: 0 10px 30px rgba(63,35,19,0.04);
+    }
+
+    .topbar {
+      max-width: 1240px;
+      padding: 16px 22px;
+    }
+
+    .brand {
+      gap: 12px;
+      font-size: 21px;
+      letter-spacing: -0.04em;
+    }
+
+    .logo {
+      width: 42px;
+      height: 42px;
+      background: linear-gradient(135deg, #1f130d 0%, #3b2418 100%);
+      color: #ffd291;
+      box-shadow: 0 10px 24px rgba(31,19,13,0.18);
+    }
+
+    nav { gap: 10px; }
+    nav button {
+      background: rgba(255,255,255,0.72);
+      border: 1px solid rgba(123,92,69,0.15);
+      border-radius: 14px;
+      padding: 10px 14px;
+      font-weight: 700;
+      backdrop-filter: blur(12px);
+      box-shadow: var(--shadow-soft);
+    }
+    nav button.active {
+      background: linear-gradient(135deg, #1f130d 0%, #3d2619 100%);
+      color: white;
+      border-color: rgba(31,19,13,0.8);
+      box-shadow: 0 12px 28px rgba(31,19,13,0.22);
+    }
+
+    main {
+      max-width: 1240px;
+      padding: 28px 22px 76px;
+    }
+
+    .hero-card, .card, .chart-card, .dashboard-section, .hours-card, .hours-note,
+    .availability-panel, .availability-stat, .delivery-top, .delivery-order-card,
+    .performance-card, .calendar-card, .shift-card, .quick-stat, .mgr-topbar,
+    .mgr-bulk-bar, .mgr-order-card, .dash-card, .insight-card, .home-hero-new,
+    .category-card, .how-card, .status-card, .order-card, .modal, .chat-box,
+    .availability-hero, .availability-status {
+      background: var(--card);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(123,92,69,0.14);
+      box-shadow: var(--shadow);
+    }
+
+    .card, .hero-card { border-radius: 26px; }
+    .card { padding: 20px; }
+
+    h1, h2, h3 {
+      letter-spacing: -0.04em;
+      color: var(--dark);
+    }
+    h1 { font-size: 48px; }
+    h2 { font-size: 30px; }
+    h3 { font-size: 20px; }
+    p { color: var(--muted); }
+
+    .tag, .status-pill, .status-tag, .chip, .chip-soft, .hero-kicker, .order-count, .order-count,
+    .home-hero-copy .tag {
+      backdrop-filter: blur(8px);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.45);
+    }
+
+    .home-hero-new {
+      background:
+        radial-gradient(circle at 78% 24%, rgba(240, 183, 103, 0.20), transparent 24%),
+        radial-gradient(circle at 86% 78%, rgba(255,255,255,0.10), transparent 18%),
+        linear-gradient(135deg, #1b110d 0%, #301d15 42%, #5a3825 68%, #e7bf84 100%);
+      border-radius: 34px;
+      min-height: 470px;
+      padding: 42px;
+    }
+    .home-hero-new::before {
+      background: linear-gradient(92deg, rgba(21,13,10,0.92) 0%, rgba(21,13,10,0.82) 36%, rgba(21,13,10,0.18) 100%);
+    }
+    .home-hero-copy h1 {
+      color: #fff;
+      text-shadow: 0 10px 28px rgba(0,0,0,.18);
+    }
+    .home-hero-copy p { color: rgba(255,255,255,0.84); }
+    .home-hero-visual {
+      border-radius: 30px;
+      border: 1px solid rgba(255,255,255,0.18);
+      box-shadow: 0 26px 50px rgba(0,0,0,0.26);
+    }
+    .home-floating-card {
+      border: 1px solid rgba(123,92,69,0.10);
+      background: rgba(255,248,241,0.88);
+      border-radius: 24px;
+    }
+
+    .home-section-title { margin: 34px 0 18px; }
+
+    .category-card {
+      min-height: 188px;
+      border-radius: 28px;
+      border: 1px solid rgba(123,92,69,0.12);
+    }
+    .category-card::after {
+      background: linear-gradient(0deg, rgba(18,12,8,0.80) 0%, rgba(18,12,8,0.34) 56%, rgba(18,12,8,0.06) 100%);
+    }
+    .category-card-content h3 { color: #fff; font-size: 24px; }
+    .category-card-content span { color: rgba(255,255,255,0.82); }
+
+    .how-card, .status-card, .stat-box, .hours-row, .ranking-row, .driver-card,
+    .driver-stats div, .shift-card-clean, .quick-stat, .availability-stat, .shift-row,
+    .calendar-card.clean, .delivery-legend, .mgr-order-card, .delivery-order-card,
+    .menu-helper-banner, .notice {
+      border-radius: 20px;
+    }
+    .how-card, .status-card, .stat-box, .hours-row, .ranking-row, .driver-card,
+    .driver-stats div, .shift-card-clean, .quick-stat, .availability-stat, .shift-row,
+    .delivery-legend, .menu-helper-banner, .notice {
+      background: rgba(255,255,255,0.72);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(123,92,69,0.12);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .status-card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.80), rgba(255,244,228,0.84));
+    }
+    .status-card strong, .stat-value, .dash-card .value { letter-spacing: -0.04em; }
+
+    .hours-card, .hours-note { border-radius: 28px; }
+    .hours-note {
+      background: linear-gradient(180deg, rgba(255,255,255,0.82), rgba(255,242,224,0.88));
+    }
+    .hours-row.today {
+      background: linear-gradient(135deg, rgba(255,238,213,0.95), rgba(250,225,189,0.92));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.45);
+    }
+
+    .menu-hero {
+      min-height: 240px;
+      border-radius: 28px;
+      border: 1px solid rgba(123,92,69,0.14);
+      box-shadow: 0 20px 44px rgba(63,35,19,0.14);
+    }
+    .menu-hero-overlay {
+      background: linear-gradient(90deg, rgba(17,10,8,0.80) 0%, rgba(17,10,8,0.55) 42%, rgba(17,10,8,0.12) 100%);
+    }
+    .menu-hero-content { padding: 30px; }
+    .menu-hero-content h3 {
+      color: #fff;
+      font-size: 36px;
+      text-shadow: 0 8px 24px rgba(0,0,0,.18);
+    }
+    .menu-hero-content p { color: rgba(255,255,255,0.88); }
+    .menu-helper-banner {
+      background: linear-gradient(135deg, rgba(255,248,211,0.92), rgba(255,239,191,0.90));
+      border-color: rgba(196, 154, 74, 0.24);
+      color: #7a5612;
+    }
+
+    .dish-img {
+      height: 132px;
+      border-radius: 18px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.18);
+    }
+
+    .input, textarea, select, .mgr-toolbar select, .mgr-search {
+      background: rgba(255,255,255,0.76);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(123,92,69,0.16);
+      border-radius: 14px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.5);
+    }
+    .input:focus, textarea:focus, select:focus, .mgr-search:focus {
+      border-color: rgba(214,99,45,0.40);
+      box-shadow: 0 0 0 4px rgba(214,99,45,0.08);
+    }
+
+    .order-card, .mgr-order-card, .delivery-order-card {
+      border-radius: 22px;
+      overflow: hidden;
+    }
+    .order-head { margin-bottom: 2px; }
+    .order-actions, .mgr-order-actions, .delivery-actions { gap: 10px; }
+
+    .chat-box {
+      border-radius: 24px;
+      background: rgba(255,255,255,0.72);
+    }
+    .msg { border-radius: 18px; box-shadow: var(--shadow-soft); }
+    .user-msg { background: linear-gradient(135deg, #23170f, #41291d); }
+    .bot-msg { background: rgba(255,243,226,0.92); }
+
+    .delivery-top, .mgr-topbar {
+      border-radius: 24px;
+      padding: 14px 20px;
+      background: rgba(255,255,255,0.72);
+    }
+    .delivery-logo, .mgr-logo {
+      border-radius: 16px;
+      box-shadow: var(--shadow-soft);
+    }
+    .delivery-tabs button.active, .mgr-tabs button.active {
+      color: var(--dark);
+      border-bottom-color: var(--accent);
+      box-shadow: none;
+    }
+    .delivery-primary-wide {
+      background: linear-gradient(135deg, #1f130d 0%, #3c2519 100%);
+      box-shadow: 0 12px 24px rgba(31,19,13,.18);
+    }
+
+    .dash-card, .insight-card, .chart-card, .availability-panel, .availability-hero,
+    .availability-status, .performance-card, .calendar-card, .hours-card, .hours-note,
+    .delivery-top, .delivery-order-card, .mgr-topbar, .mgr-order-card {
+      position: relative;
+      overflow: hidden;
+    }
+    .dash-card::before, .insight-card::before, .chart-card::before, .availability-panel::before,
+    .availability-hero::before, .availability-status::before, .performance-card::before,
+    .calendar-card::before, .hours-card::before, .hours-note::before, .delivery-top::before,
+    .delivery-order-card::before, .mgr-topbar::before, .mgr-order-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, rgba(255,255,255,0.85), rgba(255,255,255,0.15));
+      pointer-events: none;
+    }
+
+    .dash-card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,246,236,0.86));
+      border-radius: 22px;
+    }
+    .insight-card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.94), rgba(255,241,226,0.84));
+    }
+    .chart-card {
+      border-radius: 24px;
+      background: rgba(255,255,255,0.82);
+    }
+    .progress-track {
+      background: rgba(255,242,226,0.88);
+      border-color: rgba(123,92,69,0.10);
+      height: 12px;
+    }
+    .progress-fill {
+      background: linear-gradient(90deg, #efb86b 0%, #d6632d 100%);
+      box-shadow: 0 8px 16px rgba(214,99,45,0.18);
+    }
+    .week-bar {
+      background: linear-gradient(180deg, #2f1c14 0%, #d6632d 100%);
+      box-shadow: 0 8px 20px rgba(214,99,45,0.18), inset 0 1px 0 rgba(255,255,255,.22);
+    }
+    .donut::after { background: rgba(255,255,255,0.96); }
+    .ranking-row {
+      background: linear-gradient(180deg, rgba(255,255,255,0.84), rgba(255,247,238,0.82));
+    }
+    .driver-card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.84), rgba(255,245,232,0.82));
+    }
+    .driver-stats div { background: rgba(255,255,255,0.88); }
+
+    .availability-hero {
+      background: linear-gradient(135deg, rgba(255,255,255,0.90), rgba(255,241,224,0.88));
+      border-radius: 28px;
+    }
+    .availability-status {
+      background: linear-gradient(180deg, rgba(255,255,255,0.90), rgba(255,248,241,0.88));
+    }
+    .availability-panel, .performance-card, .calendar-card {
+      border-radius: 24px;
+      background: rgba(255,255,255,0.82);
+    }
+
+    .footer-note {
+      border-top-color: rgba(123,92,69,0.14);
+      color: #7d6b5e;
+    }
+
+    @media (max-width: 900px) {
+      .home-hero-new { min-height: auto; padding: 30px; }
+      .home-hero-copy h1 { font-size: 42px; }
+      .category-showcase, .how-grid, .status-strip { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 560px) {
+      main { padding: 22px 14px 64px; }
+      .topbar { padding: 14px 14px; }
+      nav button { width: auto; }
+      .home-hero-copy h1 { font-size: 36px; }
+      .menu-hero-content h3 { font-size: 30px; }
+    }
+
   </style>
 </head>
 <body>
@@ -916,7 +1275,7 @@
   </div>
 
   <script>
-    const STORE_KEY = 'for_you_restaurant_demo_v12_manager_analytics';
+    const STORE_KEY = 'for_you_restaurant_demo_v13_modern_interface';
     const MANAGER_PIN = '1234';
     const DELIVERY_PIN = '2222';
 
