@@ -1774,19 +1774,23 @@
       max-width: 70%;
       color: #17120f;
     }
-    .menu-card-monogram {
-      width: 74px;
-      height: 74px;
+    .menu-card-illustration {
+      width: 82px;
+      height: 82px;
       border-radius: 24px;
       display: grid;
       place-items: center;
-      background: rgba(255,255,255,0.70);
+      background: rgba(255,255,255,0.78);
       border: 1px solid rgba(56,47,39,0.08);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.72);
-      font-size: 28px;
-      font-weight: 900;
-      color: #17120f;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.78), 0 10px 22px rgba(31, 20, 12, 0.08);
+      padding: 10px;
       flex-shrink: 0;
+      overflow: hidden;
+    }
+    .menu-card-illustration svg {
+      width: 100%;
+      height: 100%;
+      display: block;
     }
     .menu-card-body {
       padding: 18px 20px 20px;
@@ -1862,7 +1866,7 @@
     }
     @media (max-width: 700px) {
       .menu-card-main h3 { max-width: 100%; font-size: 26px; }
-      .menu-card-monogram { width: 60px; height: 60px; border-radius: 18px; font-size: 22px; }
+      .menu-card-illustration { width: 68px; height: 68px; border-radius: 20px; padding: 8px; }
       .menu-card-price-top { font-size: 22px; }
       .menu-card-actions button { min-width: 100%; }
     }
@@ -3576,8 +3580,97 @@ function renderMenu() {
       return 'tone-sushi';
     }
 
-    function menuMonogram(name) {
-      return (name || '').split(/\s+/).filter(Boolean).slice(0, 2).map(x => x[0]).join('').toUpperCase();
+    function categoryIllustration(category) {
+      const c = (category || '').toLowerCase();
+      const svgWrap = (inner) => `<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${inner}</svg>`;
+
+      if (c.includes('fries')) {
+        return svgWrap(`
+          <ellipse cx="40" cy="62" rx="24" ry="7" fill="#36251d" opacity="0.14"/>
+          <path d="M22 52h36l-4 11H26z" fill="#5b2e16"/>
+          <path d="M24 28h7v24h-7zM31 22h7v30h-7zM38 18h7v34h-7zM45 23h7v29h-7zM52 28h6v24h-6z" fill="#f59b2f" stroke="#7a3d14" stroke-width="1.3"/>
+          <path d="M28 52h24c6 0 11-4 12-10l1-6H16l1 6c1 6 6 10 11 10Z" fill="#2e1f17"/>
+          <path d="M26 45c4-4 8-5 12-3 5 2 10 2 16-1" stroke="#ffbf45" stroke-width="2.4" stroke-linecap="round" fill="none"/>
+        `);
+      }
+      if (c.includes('sandwich') || c.includes('burger')) {
+        return svgWrap(`
+          <ellipse cx="40" cy="63" rx="25" ry="7" fill="#36251d" opacity="0.14"/>
+          <path d="M20 47h40v8c0 4-3 7-7 7H27c-4 0-7-3-7-7z" fill="#8b4b20"/>
+          <path d="M18 38c0-9 10-15 22-15s22 6 22 15v3H18z" fill="#f3a23f"/>
+          <path d="M23 45h34l-3 6H26z" fill="#4cbf6b"/>
+          <path d="M21 43h38v4H21z" fill="#ffde72"/>
+          <path d="M23 40h34v5H23z" fill="#7b3b1a"/>
+          <circle cx="30" cy="31" r="1.4" fill="#fff3d3"/><circle cx="37" cy="28" r="1.4" fill="#fff3d3"/><circle cx="44" cy="31" r="1.4" fill="#fff3d3"/><circle cx="51" cy="29" r="1.4" fill="#fff3d3"/>
+        `);
+      }
+      if (c.includes('drink') || c.includes('coffee')) {
+        return svgWrap(`
+          <ellipse cx="40" cy="63" rx="20" ry="6" fill="#36251d" opacity="0.14"/>
+          <path d="M25 27h25l-2 27H27z" fill="#9b5c2a"/>
+          <path d="M28 32h19l-1.3 17H29.3z" fill="#f3d4ab" opacity="0.65"/>
+          <path d="M50 32h5c4 0 7 3 7 7s-3 7-7 7h-3" fill="none" stroke="#9b5c2a" stroke-width="3"/>
+          <path d="M31 24h13" stroke="#fff4dc" stroke-width="2.6" stroke-linecap="round"/>
+          <path d="M33 18c0 3-2 4-2 7" stroke="#8e8a8a" stroke-width="2" stroke-linecap="round" fill="none"/>
+          <path d="M40 16c0 4-2 5-2 8" stroke="#8e8a8a" stroke-width="2" stroke-linecap="round" fill="none"/>
+        `);
+      }
+      if (c.includes('dessert') || c.includes('sundae')) {
+        return svgWrap(`
+          <ellipse cx="40" cy="63" rx="21" ry="6" fill="#36251d" opacity="0.14"/>
+          <path d="M33 51h14l-2 8H35z" fill="#e0b27a"/>
+          <path d="M28 33c0-6 5-10 12-10 3 0 6 1 8 3 2-2 4-3 7-3 5 0 9 4 9 9 0 4-2 7-5 9 1 1 2 3 2 5 0 4-3 8-8 8H32c-5 0-8-4-8-8 0-3 2-5 4-7-1-2 0-4 0-6Z" fill="#fff7f2"/>
+          <path d="M28 41c8-5 18-5 27 0" stroke="#ff9b43" stroke-width="4" stroke-linecap="round" fill="none"/>
+          <circle cx="42" cy="26" r="3" fill="#ff5d6f"/>
+        `);
+      }
+      if (c.includes('combo') || c.includes('box')) {
+        return svgWrap(`
+          <ellipse cx="40" cy="63" rx="24" ry="7" fill="#36251d" opacity="0.14"/>
+          <rect x="18" y="42" width="44" height="12" rx="5" fill="#3a2a23"/>
+          <rect x="20" y="30" width="26" height="14" rx="4" fill="#f5a13d"/>
+          <rect x="48" y="28" width="10" height="20" rx="3" fill="#ffe2a1"/>
+          <rect x="22" y="24" width="22" height="8" rx="4" fill="#56c26b"/>
+          <circle cx="53" cy="23" r="7" fill="#ff7e42"/>
+          <path d="M53 19v8M49 23h8" stroke="#fff7ea" stroke-width="1.8" stroke-linecap="round"/>
+        `);
+      }
+      if (c.includes('side')) {
+        return svgWrap(`
+          <ellipse cx="40" cy="63" rx="24" ry="7" fill="#36251d" opacity="0.14"/>
+          <path d="M21 49h38l-4 10H25z" fill="#6c3d21"/>
+          <path d="M25 29h6v20h-6zM32 25h6v24h-6zM39 22h6v27h-6zM46 27h6v22h-6z" fill="#f2c14d" stroke="#8b5e1e" stroke-width="1.2"/>
+          <circle cx="57" cy="31" r="8" fill="#ffd56a"/>
+          <path d="M53 31h8M57 27v8" stroke="#8b5e1e" stroke-width="1.8" stroke-linecap="round"/>
+        `);
+      }
+      if (c.includes('bowl') || c.includes('mac')) {
+        return svgWrap(`
+          <ellipse cx="40" cy="63" rx="24" ry="7" fill="#36251d" opacity="0.14"/>
+          <path d="M21 42h38c-1 10-9 18-19 18S22 52 21 42Z" fill="#6b4026"/>
+          <path d="M24 40c3-8 12-13 24-13 7 0 12 2 16 6-4 6-12 9-24 9-7 0-12-1-16-2Z" fill="#f5c85d"/>
+          <path d="M28 34c7 5 14 5 22 0" stroke="#ff9b43" stroke-width="3" stroke-linecap="round" fill="none"/>
+          <path d="M31 29c2 3 2 6 0 9M39 27c2 3 2 7 0 10M47 29c2 3 2 6 0 9" stroke="#d77634" stroke-width="2" stroke-linecap="round"/>
+        `);
+      }
+      if (c.includes('sushi') || c.includes('california') || c.includes('maxi') || c.includes('futomaki') || c.includes('roll') || c.includes('spring')) {
+        return svgWrap(`
+          <ellipse cx="40" cy="63" rx="24" ry="7" fill="#36251d" opacity="0.14"/>
+          <rect x="17" y="45" width="46" height="7" rx="3.5" fill="#2f1f18"/>
+          <circle cx="29" cy="36" r="10" fill="#fffaf6" stroke="#2e2018" stroke-width="2"/>
+          <circle cx="51" cy="36" r="10" fill="#fffaf6" stroke="#2e2018" stroke-width="2"/>
+          <circle cx="29" cy="36" r="4.6" fill="#ff8a65"/>
+          <circle cx="51" cy="36" r="4.6" fill="#8bc34a"/>
+          <path d="M58 23l9-6" stroke="#9b6b43" stroke-width="3" stroke-linecap="round"/>
+          <path d="M56 29l11-7" stroke="#c58a57" stroke-width="3" stroke-linecap="round"/>
+        `);
+      }
+      return svgWrap(`
+        <ellipse cx="40" cy="63" rx="22" ry="6" fill="#36251d" opacity="0.14"/>
+        <path d="M24 49h32l-2 8H26z" fill="#7c4a29"/>
+        <path d="M28 28h24c6 0 10 5 10 11 0 7-4 11-10 11H28c-6 0-10-4-10-11 0-6 4-11 10-11Z" fill="#f0c36e"/>
+        <path d="M28 41h24" stroke="#fff0cd" stroke-width="2.8" stroke-linecap="round"/>
+      `);
     }
 
     function compactSummary(item) {
@@ -3588,8 +3681,8 @@ function renderMenu() {
 
     function visualNote(item) {
       const c = (item.category || '').toLowerCase();
-      if (c.includes('sushi')) return 'Fresh selection';
-      if (c.includes('fries')) return 'Signature pick';
+      if (c.includes('sushi')) return 'Fresh pick';
+      if (c.includes('fries')) return 'Popular';
       if (c.includes('sandwich')) return 'Best seller';
       if (c.includes('drink')) return 'Refreshing';
       if (c.includes('dessert') || c.includes('sundae')) return 'Sweet finish';
@@ -3608,7 +3701,7 @@ function renderMenu() {
             </div>
             <div class="menu-card-main">
               <h3>${item.name}</h3>
-              <div class="menu-card-monogram">${menuMonogram(item.name)}</div>
+              <div class="menu-card-illustration">${categoryIllustration(item.category)}</div>
             </div>
           </div>
           <div class="menu-card-body">
