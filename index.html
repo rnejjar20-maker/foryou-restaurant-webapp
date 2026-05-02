@@ -3600,10 +3600,9 @@
 
     // Chat uses sessionStorage — fresh per browser session, persistent within same tab
     function loadChat() {
-      try { const s = sessionStorage.getItem(CHAT_KEY); if (s) return JSON.parse(s); } catch(e) {}
-      return [{from:'bot', text:'Hi, welcome to For You Restaurant. I can recommend items using the menu and the order analytics. Ask me what is popular, what fits your budget, or what goes well with an item.', items:[]}];
+      return [{from:'bot', text:'Hi, welcome to For You Restaurant. Tell me what you like, what you do not like, your budget, or your mood, and I will suggest items using the menu and order analytics.', items:[]}];
     }
-    function saveChat() { try { sessionStorage.setItem(CHAT_KEY, JSON.stringify(chatMessages)); } catch(e) {} }
+    function saveChat() { /* Chat intentionally resets when the website is reopened. */ }
     let chatMessages = loadChat();
 
     function loadState() {
@@ -9540,14 +9539,14 @@ function renderMenu() {
     function renderAssistant() {
       byId('assistant').innerHTML = `
         <h2>Smart Menu Assistant</h2>
-        <p>Ask naturally. The assistant uses the menu, ingredients, prices, availability, and order analytics to suggest what customers are most likely to enjoy.</p>
-        <div class="notice">Prototype mode: recommendations are generated from the restaurant menu and analytics data stored in this website.</div>
+        <p>Ask naturally. The assistant adapts to what the customer likes, dislikes, budget, ingredients, menu availability, and order analytics.</p>
+        <div class="notice">Prototype mode: recommendations are generated from the restaurant menu and analytics data stored in this website. The chat resets when the website is reopened.</div>
         <div class="card">
           <div id="chatBox" class="chat-box">${chatMessages.map(renderChatMsg).join('')}</div>
           <div class="chat-chips">
-            ${['Hi','What is popular?','Recommend something filling','What can I get for 50 MAD?','Something spicy','What goes well with a burger?','What are peak hours?','I want sushi'].map(p=>`<button class="chip" onclick="quickPrompt('${p.replace(/'/g, "\\'")}')">${p}</button>`).join('')}
+            ${['Hi','I do not like cheese','I want chicken under 60 MAD','What is popular?','Something filling but no shrimp','What goes well with a burger?','What are peak hours?','I want sushi'].map(p=>`<button class="chip" onclick="quickPrompt('${p.replace(/'/g, "\\'")}')">${p}</button>`).join('')}
           </div>
-          <div class="row"><input id="chatInput" class="input" placeholder="Ask about the menu, budget, ingredients, popularity..." onkeydown="if(event.key==='Enter') sendChat()" /><button class="primary" onclick="sendChat()">Send</button></div>
+          <div class="row"><input id="chatInput" class="input" placeholder="Example: I want something spicy but no cheese under 70 MAD..." onkeydown="if(event.key==='Enter') sendChat()" /><button class="primary" onclick="sendChat()">Send</button></div>
         </div>
       `;
       setTimeout(() => { const box = byId('chatBox'); if (box) box.scrollTop = box.scrollHeight; }, 10);
@@ -9629,205 +9628,290 @@ function renderMenu() {
       };
     }
 
-    function cleanText(s) {
-      return escapeHtml(String(s || '')).replace(/\n/g, '<br>');
+    function normalizeAssistantText(s) {
+      return String(s || '').toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/[’']/g, '')
+        .replace(/(.)\1{2,}/g, '$1$1');
     }
 
-    function itemReason(item, analytics, mode) {
+    function itemSearchText(item) {
+      return `${item.name} ${item.category} ${item.desc} ${(item.ingredients || []).join(' ')}`.toLowerCase();
+    }
+
+    function preferenceTerms() {
+      return {
+        cheese: ['cheese','cheese sauce','cream cheese','mozzarella','gouda','emmental','blue cheese'],
+        shrimp: ['shrimp','crevette','crevettes','gambas','ebi'],
+        salmon: ['salmon','saumon'],
+        chicken: ['chicken','fried chicken','korean chicken'],
+        beef: ['beef'],
+        fish: ['salmon','saumon','surimi','sushi','maki'],
+        avocado: ['avocado','avocat'],
+        spicy: ['spicy','chilli','algerian sauce','korean'],
+        pork: ['pork','bacon'],
+        sesame: ['sesame','sésame'],
+        onion: ['onion','onions','crispy onions','onion rings'],
+        coffee: ['coffee','espresso','latte','americano'],
+        dairy: ['cheese','milk','cream','latte','milkshake','mac n cheese','mozzarella','gouda','emmental','blue cheese']
+      };
+    }
+
+    function detectNegatives(text) {
+      const t = normalizeAssistantText(text);
+      const negs = [];
+      const terms = preferenceTerms();
+      Object.entries(terms).forEach(([key, words]) => {
+        const mentioned = words.some(w => t.includes(normalizeAssistantText(w)));
+        if (!mentioned) return;
+        const negPattern = /(dont like|do not like|hate|avoid|without|no |not with|allergic|i dont eat|i do not eat|i cant eat|i cannot eat|remove|exclude)/;
+        if (negPattern.test(t)) negs.push(key);
+      });
+      return [...new Set(negs)];
+    }
+
+    function detectPositiveTerms(text) {
+      const t = normalizeAssistantText(text);
+      const positives = [];
+      const terms = preferenceTerms();
+      Object.entries(terms).forEach(([key, words]) => {
+        const mentioned = words.some(w => t.includes(normalizeAssistantText(w)));
+        if (mentioned && !detectNegatives(text).includes(key)) positives.push(key);
+      });
+      return [...new Set(positives)];
+    }
+
+    function assistantProfile(currentText) {
+      const userTexts = chatMessages.filter(m => m.from === 'user').map(m => m.text).concat([currentText || '']);
+      const negative = [...new Set(userTexts.flatMap(detectNegatives))];
+      const positive = [...new Set([currentText || ''].flatMap(detectPositiveTerms))];
+      return { negative, positive };
+    }
+
+    function itemHasPreference(item, pref) {
+      const terms = preferenceTerms()[pref] || [pref];
+      const text = itemSearchText(item);
+      return terms.some(w => text.includes(normalizeAssistantText(w)));
+    }
+
+    function itemAllowedByProfile(item, profile) {
+      return item.available && !profile.negative.some(pref => itemHasPreference(item, pref));
+    }
+
+    function explainAvoidance(profile) {
+      if (!profile.negative.length) return '';
+      return ` I avoided items containing ${profile.negative.join(', ')}.`;
+    }
+
+    function compactReason(item, analytics, mode, profile) {
       const stat = analytics.itemStats[item.id];
       const base = item.desc ? item.desc.split('.')[0] : item.category;
-      if (mode === 'popular' && stat) return `${base}. Ordered ${stat.qty} time(s) in the demo data`;
-      if (mode === 'revenue' && stat) return `${base}. Generated ${money(stat.revenue)} in the demo data`;
-      if (mode === 'budget') return `${base}. Fits your budget`;
-      if (mode === 'pairing') return `${base}. Frequently appears with similar orders`;
-      if (mode === 'ingredient') return `${base}. Matches your ingredient preference`;
-      return base;
+      const safe = profile?.negative?.length ? ` Fits your preference restrictions.` : '';
+      if (mode === 'popular' && stat) return `${base}. Ordered ${stat.qty} time(s) in the demo data.${safe}`;
+      if (mode === 'revenue' && stat) return `${base}. Generated ${money(stat.revenue)} in the demo data.${safe}`;
+      if (mode === 'budget') return `${base}. Fits the budget.${safe}`;
+      if (mode === 'pairing') return `${base}. Works well as an add-on or pairing.${safe}`;
+      if (mode === 'ingredient') return `${base}. Matches your preference.${safe}`;
+      return `${base}.${safe}`;
     }
 
-    function topAvailableItems(items, analytics, limit = 3, mode = 'popular') {
-      const available = items.filter(x => x && x.available);
-      return available
-        .map(item => ({ item, score: (analytics.itemStats[item.id]?.qty || 0) * 4 + (analytics.itemStats[item.id]?.revenue || 0) / 50 + (100 - item.price) / 20 }))
+    function scoreItem(item, analytics, profile, budget) {
+      let score = 0;
+      const stat = analytics.itemStats[item.id];
+      if (stat) score += stat.qty * 4 + stat.revenue / 50;
+      if (budget && item.price <= budget) score += 20 + (budget - item.price) / 4;
+      if (profile.positive.length && profile.positive.some(p => itemHasPreference(item, p))) score += 35;
+      if (item.category === 'Drinks + Coffee' || item.category === 'Sides') score += 2;
+      return score;
+    }
+
+    function topAvailableItems(items, analytics, limit = 3, mode = 'popular', profile = {negative:[], positive:[]}, budget = null) {
+      const seen = new Set();
+      return items
+        .filter(x => x && !seen.has(x.id) && seen.add(x.id))
+        .filter(x => itemAllowedByProfile(x, profile))
+        .filter(x => !budget || x.price <= budget)
+        .map(item => ({ item, score: scoreItem(item, analytics, profile, budget) }))
         .sort((a,b) => b.score - a.score)
         .slice(0, limit)
-        .map(x => ({ id:x.item.id, name:x.item.name, price:x.item.price, reason:itemReason(x.item, analytics, mode) }));
+        .map(x => ({ id:x.item.id, name:x.item.name, price:x.item.price, reason:compactReason(x.item, analytics, mode, profile) }));
     }
 
     function findMenuItemInText(t) {
-      const normalized = t.toLowerCase();
+      const normalized = normalizeAssistantText(t);
       return state.menu
-        .filter(x => normalized.includes(x.name.toLowerCase()))
+        .filter(x => normalized.includes(normalizeAssistantText(x.name)))
         .sort((a,b) => b.name.length - a.name.length)[0];
     }
 
-    function findIngredientWords(t) {
-      const all = [...new Set(state.menu.flatMap(x => x.ingredients || []))].map(x => String(x).toLowerCase());
-      return all.filter(ing => ing.length > 2 && t.includes(ing));
-    }
-
     function categoryMatches(t) {
+      const normalized = normalizeAssistantText(t);
       const cats = [...new Set(state.menu.map(x => x.category))];
       return cats.filter(c => {
-        const low = c.toLowerCase();
-        return t.includes(low) || (low === 'drinks + coffee' && (t.includes('drink') || t.includes('coffee') || t.includes('juice'))) || (low === 'loaded fries' && t.includes('fries'));
+        const low = normalizeAssistantText(c);
+        return normalized.includes(low) ||
+          (low === 'drinks + coffee' && /(drink|coffee|juice|tea|soda|latte|milkshake)/.test(normalized)) ||
+          (low === 'loaded fries' && normalized.includes('fries')) ||
+          (low === 'sandwiches' && /(burger|sandwich|wrap|tacos|burrito)/.test(normalized)) ||
+          (low === 'sushi' && /(sushi|roll|maki|california|maxi|futomaki|burrito|box)/.test(normalized));
       });
     }
 
     function extractBudget(t) {
-      const m = t.match(/(\d{1,3})\s*(mad|dh|dhs|dirham|dirhams)?/i);
+      const m = normalizeAssistantText(t).match(/(\d{1,3})\s*(mad|dh|dhs|dirham|dirhams)?/i);
       return m ? Number(m[1]) : null;
     }
 
-    function assistantReply(text) {
-      const t = text.toLowerCase().trim();
-      const analytics = assistantAnalytics();
+    function detectedIngredientWords(text) {
+      const t = normalizeAssistantText(text);
+      const all = [...new Set(state.menu.flatMap(x => x.ingredients || []))].map(x => normalizeAssistantText(x));
+      return all.filter(ing => ing.length > 2 && t.includes(ing));
+    }
 
-      if (/^(hi|hello|hey|salam|salut|bonjour|good morning|good evening)\b/.test(t)) {
-        const topCat = analytics.topCategories[0]?.category || 'Loaded Fries';
-        const topItem = analytics.topItemsByQty[0]?.item?.name || 'Frosty Fries';
+    function formatPrefs(profile) {
+      const liked = profile.positive.length ? `you seem interested in ${profile.positive.join(', ')}` : '';
+      const avoided = profile.negative.length ? `you want to avoid ${profile.negative.join(', ')}` : '';
+      return [liked, avoided].filter(Boolean).join(' and ');
+    }
+
+    function assistantReply(text) {
+      const t = normalizeAssistantText(text).trim();
+      const analytics = assistantAnalytics();
+      const profile = assistantProfile(text);
+      const budget = extractBudget(t);
+
+      if (/(^|\b)(hi+|he+l+o+|hey+|salam|salut|bonjour|good morning|good evening)(\b|$)/.test(t) || t.includes('how are you')) {
         return {
-          text: `Hey, welcome to For You. I can help you choose based on taste, budget, ingredients, and what customers usually order. Right now, ${topCat} is one of the strongest categories in the demo analytics, and ${topItem} is a popular pick.`,
-          items: topAvailableItems(analytics.topItemsByQty.map(x => x.item), analytics, 3, 'popular')
+          text: "Hey, I’m doing great. Tell me what you feel like eating, what you want to avoid, or your budget, and I’ll suggest something from the menu using the analytics.",
+          items: []
         };
       }
 
       if (t.includes('thank') || t.includes('merci') || t.includes('chokran')) {
-        return { text: "You're welcome. Tell me your budget or what you feel like eating, and I can narrow it down.", items: [] };
+        return { text: "You’re welcome. Give me a budget or tell me what you do not like, and I’ll adjust the suggestions.", items: [] };
       }
 
       if (t.includes('what can you do') || t.includes('help') || t.includes('how can you help')) {
         return {
-          text: "I can recommend items using menu data and analytics. Try asking: what is popular, what can I get for 50 MAD, what has chicken, what goes well with a burger, what is spicy, or what are peak hours.",
+          text: "I can recommend based on popularity, budget, ingredients, restrictions, pairings, and peak hours. For example: “I want chicken but no cheese under 70 MAD” or “I do not like shrimp, what sushi can I get?”",
           items: []
         };
       }
 
       if (t.includes('opening') || t.includes('hours') || t.includes('open') || t.includes('close')) {
-        return {
-          text: "For You opens at 3PM. Closing is 12:30AM from Monday to Thursday, 1AM on Sunday, and 2AM on Friday and Saturday.",
-          items: []
-        };
+        return { text: "For You opens at 3PM. Closing is 12:30AM from Monday to Thursday, 1AM on Sunday, and 2AM on Friday and Saturday.", items: [] };
       }
 
       if (t.includes('pay') || t.includes('payment') || t.includes('card') || t.includes('cash')) {
-        return {
-          text: "Payment options in this prototype are cash at delivery and card at delivery. The analytics dashboard also tracks the payment mix between those two methods.",
-          items: []
-        };
+        return { text: "Payment options are cash at delivery and card at delivery.", items: [] };
       }
 
       if (t.includes('track') || t.includes('delivery') || t.includes('order status')) {
-        return {
-          text: "To track an order, go to Track Order and enter the order ID. The order flow can move through received, accepted, preparing, assigned to delivery, out for delivery, and delivered.",
-          items: []
-        };
+        return { text: "To track an order, go to Track Order and enter the order ID. You can follow the flow from received to delivered.", items: [] };
       }
 
       if (t.includes('peak') || t.includes('busy') || t.includes('busiest') || t.includes('best time')) {
         const topHours = analytics.peakHours.slice(0, 3).map(x => `${x.hour}:00–${x.hour}:59`).join(', ');
         return {
-          text: `Based on the demo order analytics, demand is strongest around ${topHours || 'evening hours'}. Friday and Saturday nights are intentionally heavier in the synthetic data.`,
-          items: topAvailableItems(analytics.topItemsByQty.map(x => x.item), analytics, 3, 'popular')
+          text: `Based on the demo analytics, the busiest periods are around ${topHours || 'evening hours'}. Friday and Saturday nights are intentionally the strongest peak periods.`,
+          items: topAvailableItems(analytics.topItemsByQty.map(x => x.item), analytics, 3, 'popular', profile)
         };
       }
 
       const specificItem = findMenuItemInText(t);
-      if (specificItem && (t.includes('what is') || t.includes('what has') || t.includes('ingredient') || t.includes('details') || t.includes('price') || t.includes('how much') || t.includes('prep'))) {
+      if (specificItem && /(what is|what has|ingredient|details|price|how much|prep|contains|available)/.test(t)) {
+        if (!itemAllowedByProfile(specificItem, profile)) {
+          const alternatives = state.menu.filter(x => x.category === specificItem.category);
+          return {
+            text: `${specificItem.name} may not fit because ${formatPrefs(profile)}. Here are better alternatives from the same area of the menu.${explainAvoidance(profile)}`,
+            items: topAvailableItems(alternatives, analytics, 4, 'popular', profile, budget)
+          };
+        }
         const stat = analytics.itemStats[specificItem.id];
         const popularity = stat ? ` In the demo data, it was ordered ${stat.qty} time(s) and generated ${money(stat.revenue)}.` : '';
         return {
           text: `${specificItem.name} costs ${money(specificItem.price)} and takes about ${specificItem.prep}. Ingredients: ${specificItem.ingredients.join(', ')}.${popularity}`,
-          items: [{ id:specificItem.id, name:specificItem.name, price:specificItem.price, reason:itemReason(specificItem, analytics, 'popular') }]
+          items: [{ id:specificItem.id, name:specificItem.name, price:specificItem.price, reason:compactReason(specificItem, analytics, 'popular', profile) }]
         };
       }
 
-      if (t.includes('with') || t.includes('goes well') || t.includes('together') || t.includes('pair') || t.includes('combo with')) {
-        const base = specificItem || state.menu.find(x => t.includes(x.category.toLowerCase())) || null;
+      if (profile.negative.length && /(dont like|do not like|hate|avoid|without|no |not with|allergic|i dont eat|i do not eat|i cant eat|i cannot eat|remove|exclude)/.test(t)) {
+        let basePool = state.menu;
+        const cats = categoryMatches(t);
+        if (cats.length) basePool = state.menu.filter(x => cats.includes(x.category));
+        if (profile.positive.length) basePool = basePool.filter(x => profile.positive.some(p => itemHasPreference(x, p)) || cats.includes(x.category));
+        return {
+          text: `Got it — I’ll avoid ${profile.negative.join(', ')}. Here are options that better match your preference${budget ? ` and stay under ${money(budget)}` : ''}:`,
+          items: topAvailableItems(basePool, analytics, 4, 'popular', profile, budget)
+        };
+      }
+
+      if (budget && /(budget|under|less|cheap|afford|can i get|mad|dh|dhs|dirham)/.test(t)) {
+        let pool = state.menu;
+        const cats = categoryMatches(t);
+        if (cats.length) pool = pool.filter(x => cats.includes(x.category));
+        if (profile.positive.length) pool = pool.filter(x => profile.positive.some(p => itemHasPreference(x, p)) || cats.includes(x.category));
+        const options = topAvailableItems(pool, analytics, 5, 'budget', profile, budget);
+        if (!options.length) return { text: `I could not find a good available match under ${money(budget)} with your restrictions.${explainAvoidance(profile)} Try a slightly higher budget or remove one restriction.`, items: [] };
+        return {
+          text: `For ${money(budget)} or less, I’d suggest these based on your message and the demo analytics.${explainAvoidance(profile)}`,
+          items: options
+        };
+      }
+
+      if (/(with|goes well|together|pair|combo with)/.test(t)) {
+        const base = specificItem || state.menu.find(x => t.includes(normalizeAssistantText(x.category))) || null;
         if (base && analytics.pairStats[base.id]) {
-          const pairIds = Object.entries(analytics.pairStats[base.id]).sort((a,b)=>b[1]-a[1]).map(([id])=>id);
-          const paired = pairIds.map(id => getMenuItem(id)).filter(Boolean);
-          if (paired.length) {
-            return {
-              text: `Based on order pairings, customers who choose ${base.name} often add these items:`,
-              items: topAvailableItems(paired, analytics, 3, 'pairing')
-            };
-          }
+          const paired = Object.entries(analytics.pairStats[base.id]).sort((a,b)=>b[1]-a[1]).map(([id]) => getMenuItem(id)).filter(Boolean);
+          const options = topAvailableItems(paired, analytics, 4, 'pairing', profile, budget);
+          if (options.length) return { text: `Based on order pairings, these go well with ${base.name}.${explainAvoidance(profile)}`, items: options };
         }
         const addOns = state.menu.filter(x => ['Drinks + Coffee', 'Sides', 'Sundae', 'Desserts'].includes(x.category));
-        return {
-          text: "A safe pairing is to add a drink, a side, or something sweet. These add-ons are good choices:",
-          items: topAvailableItems(addOns, analytics, 3, 'pairing')
-        };
+        return { text: `A safe pairing is a drink, side, or dessert.${explainAvoidance(profile)}`, items: topAvailableItems(addOns, analytics, 4, 'pairing', profile, budget) };
       }
 
-      const budget = extractBudget(t);
-      if (budget && (t.includes('budget') || t.includes('under') || t.includes('less') || t.includes('cheap') || t.includes('afford') || t.includes('can i get') || t.includes('mad') || t.includes('dh'))) {
-        const options = state.menu.filter(x => x.available && x.price <= budget);
-        if (!options.length) return { text: `I could not find an available item under ${money(budget)}. The cheapest available options start around ${money(Math.min(...state.menu.filter(x=>x.available).map(x=>x.price)))}.`, items: [] };
+      if (/(popular|most ordered|best seller|trending|recommend|dont know|do not know|what should i eat|suggest)/.test(t)) {
+        let pool = analytics.topItemsByQty.map(x => x.item);
+        const cats = categoryMatches(t);
+        if (cats.length) pool = state.menu.filter(x => cats.includes(x.category));
+        if (profile.positive.length) pool = pool.filter(x => profile.positive.some(p => itemHasPreference(x, p)) || cats.includes(x.category));
         return {
-          text: `For ${money(budget)} or less, I would suggest these. I ranked them using both price and popularity in the demo orders:`,
-          items: topAvailableItems(options, analytics, 4, 'budget')
-        };
-      }
-
-      if (t.includes('popular') || t.includes('most ordered') || t.includes('best seller') || t.includes('trending') || t.includes('recommend') || t.includes("don't know") || t.includes('dont know') || t.includes('what should i eat')) {
-        const topCat = analytics.topCategories[0]?.category;
-        const top2 = analytics.topCategories[1]?.category;
-        return {
-          text: `Based on the demo analytics, ${topCat || 'Loaded Fries'}${top2 ? ` and ${top2}` : ''} are performing strongly. These are my best data-based recommendations:`,
-          items: topAvailableItems(analytics.topItemsByQty.map(x => x.item), analytics, 4, 'popular')
+          text: `Based on the demo analytics, these are strong recommendations${formatPrefs(profile) ? ` while considering that ${formatPrefs(profile)}` : ''}:`,
+          items: topAvailableItems(pool, analytics, 4, 'popular', profile, budget)
         };
       }
 
       const cats = categoryMatches(t);
       if (cats.length) {
         const cat = cats[0];
-        const options = state.menu.filter(x => x.category === cat && x.available);
         const stat = analytics.categoryStats[cat];
-        const context = stat ? `${cat} has ${stat.qty} item(s) sold in the demo analytics and ${money(stat.revenue)} in revenue.` : `Here are available items from ${cat}.`;
+        const options = state.menu.filter(x => x.category === cat);
         return {
-          text: `${context} My top picks in this category are:`,
-          items: topAvailableItems(options, analytics, 4, 'popular')
+          text: `${stat ? `${cat} has ${stat.qty} item(s) sold and ${money(stat.revenue)} in demo revenue.` : `Here are options from ${cat}.`} ${explainAvoidance(profile)}`,
+          items: topAvailableItems(options, analytics, 4, 'popular', profile, budget)
         };
       }
 
-      if (t.includes('spicy')) {
-        const options = state.menu.filter(x => x.available && (x.name.toLowerCase().includes('spicy') || x.name.toLowerCase().includes('korean') || x.ingredients.join(' ').toLowerCase().includes('chilli') || x.ingredients.join(' ').toLowerCase().includes('algerian')));
-        return { text: "For something spicy or bold, I would go with these:", items: topAvailableItems(options, analytics, 4, 'ingredient') };
-      }
-
-      if (t.includes('sweet') || t.includes('dessert') || t.includes('sundae')) {
-        const options = state.menu.filter(x => x.available && ['Desserts','Sundae'].includes(x.category));
-        return { text: "For something sweet, these are the best dessert-style choices:", items: topAvailableItems(options, analytics, 4, 'ingredient') };
-      }
-
-      if (t.includes('filling') || t.includes('hungry') || t.includes('full') || t.includes('big') || t.includes('heavy')) {
-        const options = state.menu.filter(x => x.available && ['Combos','Loaded Fries','Loaded Mac','Sandwiches'].includes(x.category));
-        return { text: "For something filling, I would choose items from combos, loaded fries, loaded mac, or sandwiches:", items: topAvailableItems(options, analytics, 4, 'popular') };
-      }
-
-      if (t.includes('light') || t.includes('fresh')) {
-        const options = state.menu.filter(x => x.available && ['Sushi','Bowls','Spring Rolls','Drinks + Coffee'].includes(x.category));
-        return { text: "For something lighter or fresher, these are better fits:", items: topAvailableItems(options, analytics, 4, 'popular') };
-      }
-
-      const ingWords = findIngredientWords(t);
-      if (ingWords.length) {
-        const wantsNo = t.includes('without') || t.includes('no ') || t.includes("don't want") || t.includes('dont want');
-        const options = state.menu.filter(x => {
-          const ingredients = x.ingredients.join(' ').toLowerCase();
-          return x.available && (wantsNo ? !ingWords.some(w => ingredients.includes(w)) : ingWords.some(w => ingredients.includes(w)));
-        });
-        const phrase = wantsNo ? `without ${ingWords.join(', ')}` : `with ${ingWords.join(', ')}`;
+      if (profile.positive.length) {
+        const options = state.menu.filter(x => profile.positive.some(p => itemHasPreference(x, p)));
         return {
-          text: `Here are available options ${phrase}, ranked using the demo analytics:`,
-          items: topAvailableItems(options, analytics, 4, 'ingredient')
+          text: `Based on your message, I looked for items with ${profile.positive.join(', ')}.${explainAvoidance(profile)}`,
+          items: topAvailableItems(options, analytics, 4, 'ingredient', profile, budget)
+        };
+      }
+
+      const ingWords = detectedIngredientWords(text);
+      if (ingWords.length) {
+        const options = state.menu.filter(x => ingWords.some(w => itemSearchText(x).includes(w)));
+        return {
+          text: `I found menu items related to ${ingWords.slice(0,3).join(', ')}. Here are the best matches from analytics:`,
+          items: topAvailableItems(options, analytics, 4, 'ingredient', profile, budget)
         };
       }
 
       return {
-        text: "I can help, but I need one more clue. Tell me your budget, a category, an ingredient, or the vibe you want: spicy, sweet, fresh, filling, cheap, popular, or something to pair with another item.",
-        items: topAvailableItems(analytics.topItemsByQty.map(x => x.item), analytics, 3, 'popular')
+        text: "I can adapt better if you tell me one of these: your budget, what you like, what you do not like, a category, or an ingredient. Example: “I want chicken but no cheese under 70 MAD.”",
+        items: []
       };
     }
 
