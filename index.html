@@ -3574,7 +3574,7 @@
     ];
 
     const statusOrder = ['Order received', 'Accepted', 'Preparing', 'Assigned to delivery', 'Out for delivery', 'Delivered'];
-    const CHAT_KEY = 'for_you_chat_v1';
+    const CHAT_KEY = 'for_you_chat_v2_smart_analytics_assistant';
 
     let state = loadState();
     state.menu = normalizeMenuCategories(state.menu);
@@ -3601,7 +3601,7 @@
     // Chat uses sessionStorage — fresh per browser session, persistent within same tab
     function loadChat() {
       try { const s = sessionStorage.getItem(CHAT_KEY); if (s) return JSON.parse(s); } catch(e) {}
-      return [{from:'bot', text:'Hi, welcome to For You Restaurant! How can I help you today? 🍽️', items:[]}];
+      return [{from:'bot', text:'Hi, welcome to For You Restaurant. I can recommend items using the menu and the order analytics. Ask me what is popular, what fits your budget, or what goes well with an item.', items:[]}];
     }
     function saveChat() { try { sessionStorage.setItem(CHAT_KEY, JSON.stringify(chatMessages)); } catch(e) {} }
     let chatMessages = loadChat();
@@ -9539,15 +9539,15 @@ function renderMenu() {
 
     function renderAssistant() {
       byId('assistant').innerHTML = `
-        <h2>AI Menu Assistant</h2>
-        <p>Rule-based assistant — recommends only real, available menu items. Conversation is saved for this browser session.</p>
-        <div class="notice">No paid AI API used. This keeps the prototype free and deployable on GitHub Pages.</div>
+        <h2>Smart Menu Assistant</h2>
+        <p>Ask naturally. The assistant uses the menu, ingredients, prices, availability, and order analytics to suggest what customers are most likely to enjoy.</p>
+        <div class="notice">Prototype mode: recommendations are generated from the restaurant menu and analytics data stored in this website.</div>
         <div class="card">
           <div id="chatBox" class="chat-box">${chatMessages.map(renderChatMsg).join('')}</div>
           <div class="chat-chips">
-            ${['Something sweet','Something spicy','Something filling','Something cheap','I want sushi','I want a drink'].map(p=>`<button class="chip" onclick="quickPrompt('${p}')">${p}</button>`).join('')}
+            ${['Hi','What is popular?','Recommend something filling','What can I get for 50 MAD?','Something spicy','What goes well with a burger?','What are peak hours?','I want sushi'].map(p=>`<button class="chip" onclick="quickPrompt('${p.replace(/'/g, "\\'")}')">${p}</button>`).join('')}
           </div>
-          <div class="row"><input id="chatInput" class="input" placeholder="Type your request..." onkeydown="if(event.key==='Enter') sendChat()" /><button class="primary" onclick="sendChat()">Send</button></div>
+          <div class="row"><input id="chatInput" class="input" placeholder="Ask about the menu, budget, ingredients, popularity..." onkeydown="if(event.key==='Enter') sendChat()" /><button class="primary" onclick="sendChat()">Send</button></div>
         </div>
       `;
       setTimeout(() => { const box = byId('chatBox'); if (box) box.scrollTop = box.scrollHeight; }, 10);
@@ -9576,41 +9576,258 @@ function renderMenu() {
       renderAssistant();
     }
 
+    function assistantAnalytics() {
+      const validOrders = state.orders.filter(o => !['Rejected', 'Cancelled'].includes(o.status));
+      const itemStats = {};
+      const categoryStats = {};
+      const pairStats = {};
+      const hourStats = {};
+
+      validOrders.forEach(o => {
+        const ids = [];
+        const d = new Date(o.createdAt);
+        if (!Number.isNaN(d.getTime())) {
+          const h = d.getHours();
+          hourStats[h] = (hourStats[h] || 0) + 1;
+        }
+
+        o.items.forEach(i => {
+          const menuItem = getMenuItem(i.id);
+          if (!menuItem) return;
+          ids.push(i.id);
+
+          if (!itemStats[i.id]) itemStats[i.id] = { item: menuItem, qty: 0, revenue: 0, orders: 0 };
+          itemStats[i.id].qty += i.qty;
+          itemStats[i.id].revenue += i.price * i.qty;
+          itemStats[i.id].orders += 1;
+
+          if (!categoryStats[menuItem.category]) categoryStats[menuItem.category] = { category: menuItem.category, qty: 0, revenue: 0, orders: 0 };
+          categoryStats[menuItem.category].qty += i.qty;
+          categoryStats[menuItem.category].revenue += i.price * i.qty;
+          categoryStats[menuItem.category].orders += 1;
+        });
+
+        const uniqueIds = [...new Set(ids)];
+        uniqueIds.forEach(a => {
+          if (!pairStats[a]) pairStats[a] = {};
+          uniqueIds.forEach(b => {
+            if (a !== b) pairStats[a][b] = (pairStats[a][b] || 0) + 1;
+          });
+        });
+      });
+
+      return {
+        validOrders,
+        itemStats,
+        categoryStats,
+        pairStats,
+        hourStats,
+        topItemsByQty: Object.values(itemStats).sort((a,b) => b.qty - a.qty),
+        topItemsByRevenue: Object.values(itemStats).sort((a,b) => b.revenue - a.revenue),
+        topCategories: Object.values(categoryStats).sort((a,b) => b.qty - a.qty),
+        peakHours: Object.entries(hourStats).sort((a,b) => b[1] - a[1]).map(([h,count]) => ({hour:Number(h), count}))
+      };
+    }
+
+    function cleanText(s) {
+      return escapeHtml(String(s || '')).replace(/\n/g, '<br>');
+    }
+
+    function itemReason(item, analytics, mode) {
+      const stat = analytics.itemStats[item.id];
+      const base = item.desc ? item.desc.split('.')[0] : item.category;
+      if (mode === 'popular' && stat) return `${base}. Ordered ${stat.qty} time(s) in the demo data`;
+      if (mode === 'revenue' && stat) return `${base}. Generated ${money(stat.revenue)} in the demo data`;
+      if (mode === 'budget') return `${base}. Fits your budget`;
+      if (mode === 'pairing') return `${base}. Frequently appears with similar orders`;
+      if (mode === 'ingredient') return `${base}. Matches your ingredient preference`;
+      return base;
+    }
+
+    function topAvailableItems(items, analytics, limit = 3, mode = 'popular') {
+      const available = items.filter(x => x && x.available);
+      return available
+        .map(item => ({ item, score: (analytics.itemStats[item.id]?.qty || 0) * 4 + (analytics.itemStats[item.id]?.revenue || 0) / 50 + (100 - item.price) / 20 }))
+        .sort((a,b) => b.score - a.score)
+        .slice(0, limit)
+        .map(x => ({ id:x.item.id, name:x.item.name, price:x.item.price, reason:itemReason(x.item, analytics, mode) }));
+    }
+
+    function findMenuItemInText(t) {
+      const normalized = t.toLowerCase();
+      return state.menu
+        .filter(x => normalized.includes(x.name.toLowerCase()))
+        .sort((a,b) => b.name.length - a.name.length)[0];
+    }
+
+    function findIngredientWords(t) {
+      const all = [...new Set(state.menu.flatMap(x => x.ingredients || []))].map(x => String(x).toLowerCase());
+      return all.filter(ing => ing.length > 2 && t.includes(ing));
+    }
+
+    function categoryMatches(t) {
+      const cats = [...new Set(state.menu.map(x => x.category))];
+      return cats.filter(c => {
+        const low = c.toLowerCase();
+        return t.includes(low) || (low === 'drinks + coffee' && (t.includes('drink') || t.includes('coffee') || t.includes('juice'))) || (low === 'loaded fries' && t.includes('fries'));
+      });
+    }
+
+    function extractBudget(t) {
+      const m = t.match(/(\d{1,3})\s*(mad|dh|dhs|dirham|dirhams)?/i);
+      return m ? Number(m[1]) : null;
+    }
+
     function assistantReply(text) {
-      const t = text.toLowerCase();
-      let picks = [], label = '';
+      const t = text.toLowerCase().trim();
+      const analytics = assistantAnalytics();
 
-      const sushiCats = ['For You Rolls','Boxes','Spring Rolls','Californias','Maxis','Futomakis','Sushi Burrito','Bowls'];
-      const sandwichCats = ['Sandwiches'];
-      const fillingCats = ['Combos','Loaded Fries','Loaded Mac','Sandwiches'];
-
-      if (t.includes('sweet') || t.includes('dessert') || t.includes('sundae')) {
-        picks = state.menu.filter(x => ['Desserts','Sundae'].includes(x.category)); label = 'sweet';
-      } else if (t.includes('spicy')) {
-        picks = state.menu.filter(x => x.name.toLowerCase().includes('spicy') || x.name.toLowerCase().includes('korean') || x.ingredients.join(' ').toLowerCase().includes('chilli')); label = 'spicy';
-      } else if (t.includes('filling') || t.includes('hungry') || t.includes('full') || t.includes('big') || t.includes('combo')) {
-        picks = state.menu.filter(x => fillingCats.includes(x.category)); label = 'filling';
-      } else if (t.includes('cheap') || t.includes('budget') || t.includes('affordable')) {
-        picks = [...state.menu].sort((a,b)=>a.price-b.price); label = 'budget-friendly';
-      } else if (t.includes('sushi') || t.includes('roll') || t.includes('maki') || t.includes('burrito') || t.includes('bowl')) {
-        picks = state.menu.filter(x => sushiCats.includes(x.category)); label = 'sushi';
-      } else if (t.includes('burger') || t.includes('sandwich') || t.includes('wrap') || t.includes('tacos')) {
-        picks = state.menu.filter(x => sandwichCats.includes(x.category)); label = 'sandwich';
-      } else if (t.includes('drink') || t.includes('juice') || t.includes('coffee') || t.includes('tea') || t.includes('soda')) {
-        picks = state.menu.filter(x => x.category === 'Drinks + Coffee'); label = 'drink';
-      } else if (t.includes('fries')) {
-        picks = state.menu.filter(x => x.category === 'Loaded Fries' || x.name === 'Fries'); label = 'fries';
-      } else if (t.includes('cheese') && (t.includes('no') || t.includes('without'))) {
-        picks = state.menu.filter(x => !x.ingredients.join(' ').toLowerCase().includes('cheese')); label = 'cheese-free';
-      } else {
-        picks = state.menu.filter(x => x.available); label = 'popular';
+      if (/^(hi|hello|hey|salam|salut|bonjour|good morning|good evening)\b/.test(t)) {
+        const topCat = analytics.topCategories[0]?.category || 'Loaded Fries';
+        const topItem = analytics.topItemsByQty[0]?.item?.name || 'Frosty Fries';
+        return {
+          text: `Hey, welcome to For You. I can help you choose based on taste, budget, ingredients, and what customers usually order. Right now, ${topCat} is one of the strongest categories in the demo analytics, and ${topItem} is a popular pick.`,
+          items: topAvailableItems(analytics.topItemsByQty.map(x => x.item), analytics, 3, 'popular')
+        };
       }
 
-      picks = picks.filter(x => x.available).slice(0, 3);
-      if (!picks.length) return { text: "I couldn't find an available match. Try asking for something sweet, spicy, filling, sushi, fries, or a drink.", items: [] };
+      if (t.includes('thank') || t.includes('merci') || t.includes('chokran')) {
+        return { text: "You're welcome. Tell me your budget or what you feel like eating, and I can narrow it down.", items: [] };
+      }
+
+      if (t.includes('what can you do') || t.includes('help') || t.includes('how can you help')) {
+        return {
+          text: "I can recommend items using menu data and analytics. Try asking: what is popular, what can I get for 50 MAD, what has chicken, what goes well with a burger, what is spicy, or what are peak hours.",
+          items: []
+        };
+      }
+
+      if (t.includes('opening') || t.includes('hours') || t.includes('open') || t.includes('close')) {
+        return {
+          text: "For You opens at 3PM. Closing is 12:30AM from Monday to Thursday, 1AM on Sunday, and 2AM on Friday and Saturday.",
+          items: []
+        };
+      }
+
+      if (t.includes('pay') || t.includes('payment') || t.includes('card') || t.includes('cash')) {
+        return {
+          text: "Payment options in this prototype are cash at delivery and card at delivery. The analytics dashboard also tracks the payment mix between those two methods.",
+          items: []
+        };
+      }
+
+      if (t.includes('track') || t.includes('delivery') || t.includes('order status')) {
+        return {
+          text: "To track an order, go to Track Order and enter the order ID. The order flow can move through received, accepted, preparing, assigned to delivery, out for delivery, and delivered.",
+          items: []
+        };
+      }
+
+      if (t.includes('peak') || t.includes('busy') || t.includes('busiest') || t.includes('best time')) {
+        const topHours = analytics.peakHours.slice(0, 3).map(x => `${x.hour}:00–${x.hour}:59`).join(', ');
+        return {
+          text: `Based on the demo order analytics, demand is strongest around ${topHours || 'evening hours'}. Friday and Saturday nights are intentionally heavier in the synthetic data.`,
+          items: topAvailableItems(analytics.topItemsByQty.map(x => x.item), analytics, 3, 'popular')
+        };
+      }
+
+      const specificItem = findMenuItemInText(t);
+      if (specificItem && (t.includes('what is') || t.includes('what has') || t.includes('ingredient') || t.includes('details') || t.includes('price') || t.includes('how much') || t.includes('prep'))) {
+        const stat = analytics.itemStats[specificItem.id];
+        const popularity = stat ? ` In the demo data, it was ordered ${stat.qty} time(s) and generated ${money(stat.revenue)}.` : '';
+        return {
+          text: `${specificItem.name} costs ${money(specificItem.price)} and takes about ${specificItem.prep}. Ingredients: ${specificItem.ingredients.join(', ')}.${popularity}`,
+          items: [{ id:specificItem.id, name:specificItem.name, price:specificItem.price, reason:itemReason(specificItem, analytics, 'popular') }]
+        };
+      }
+
+      if (t.includes('with') || t.includes('goes well') || t.includes('together') || t.includes('pair') || t.includes('combo with')) {
+        const base = specificItem || state.menu.find(x => t.includes(x.category.toLowerCase())) || null;
+        if (base && analytics.pairStats[base.id]) {
+          const pairIds = Object.entries(analytics.pairStats[base.id]).sort((a,b)=>b[1]-a[1]).map(([id])=>id);
+          const paired = pairIds.map(id => getMenuItem(id)).filter(Boolean);
+          if (paired.length) {
+            return {
+              text: `Based on order pairings, customers who choose ${base.name} often add these items:`,
+              items: topAvailableItems(paired, analytics, 3, 'pairing')
+            };
+          }
+        }
+        const addOns = state.menu.filter(x => ['Drinks + Coffee', 'Sides', 'Sundae', 'Desserts'].includes(x.category));
+        return {
+          text: "A safe pairing is to add a drink, a side, or something sweet. These add-ons are good choices:",
+          items: topAvailableItems(addOns, analytics, 3, 'pairing')
+        };
+      }
+
+      const budget = extractBudget(t);
+      if (budget && (t.includes('budget') || t.includes('under') || t.includes('less') || t.includes('cheap') || t.includes('afford') || t.includes('can i get') || t.includes('mad') || t.includes('dh'))) {
+        const options = state.menu.filter(x => x.available && x.price <= budget);
+        if (!options.length) return { text: `I could not find an available item under ${money(budget)}. The cheapest available options start around ${money(Math.min(...state.menu.filter(x=>x.available).map(x=>x.price)))}.`, items: [] };
+        return {
+          text: `For ${money(budget)} or less, I would suggest these. I ranked them using both price and popularity in the demo orders:`,
+          items: topAvailableItems(options, analytics, 4, 'budget')
+        };
+      }
+
+      if (t.includes('popular') || t.includes('most ordered') || t.includes('best seller') || t.includes('trending') || t.includes('recommend') || t.includes("don't know") || t.includes('dont know') || t.includes('what should i eat')) {
+        const topCat = analytics.topCategories[0]?.category;
+        const top2 = analytics.topCategories[1]?.category;
+        return {
+          text: `Based on the demo analytics, ${topCat || 'Loaded Fries'}${top2 ? ` and ${top2}` : ''} are performing strongly. These are my best data-based recommendations:`,
+          items: topAvailableItems(analytics.topItemsByQty.map(x => x.item), analytics, 4, 'popular')
+        };
+      }
+
+      const cats = categoryMatches(t);
+      if (cats.length) {
+        const cat = cats[0];
+        const options = state.menu.filter(x => x.category === cat && x.available);
+        const stat = analytics.categoryStats[cat];
+        const context = stat ? `${cat} has ${stat.qty} item(s) sold in the demo analytics and ${money(stat.revenue)} in revenue.` : `Here are available items from ${cat}.`;
+        return {
+          text: `${context} My top picks in this category are:`,
+          items: topAvailableItems(options, analytics, 4, 'popular')
+        };
+      }
+
+      if (t.includes('spicy')) {
+        const options = state.menu.filter(x => x.available && (x.name.toLowerCase().includes('spicy') || x.name.toLowerCase().includes('korean') || x.ingredients.join(' ').toLowerCase().includes('chilli') || x.ingredients.join(' ').toLowerCase().includes('algerian')));
+        return { text: "For something spicy or bold, I would go with these:", items: topAvailableItems(options, analytics, 4, 'ingredient') };
+      }
+
+      if (t.includes('sweet') || t.includes('dessert') || t.includes('sundae')) {
+        const options = state.menu.filter(x => x.available && ['Desserts','Sundae'].includes(x.category));
+        return { text: "For something sweet, these are the best dessert-style choices:", items: topAvailableItems(options, analytics, 4, 'ingredient') };
+      }
+
+      if (t.includes('filling') || t.includes('hungry') || t.includes('full') || t.includes('big') || t.includes('heavy')) {
+        const options = state.menu.filter(x => x.available && ['Combos','Loaded Fries','Loaded Mac','Sandwiches'].includes(x.category));
+        return { text: "For something filling, I would choose items from combos, loaded fries, loaded mac, or sandwiches:", items: topAvailableItems(options, analytics, 4, 'popular') };
+      }
+
+      if (t.includes('light') || t.includes('fresh')) {
+        const options = state.menu.filter(x => x.available && ['Sushi','Bowls','Spring Rolls','Drinks + Coffee'].includes(x.category));
+        return { text: "For something lighter or fresher, these are better fits:", items: topAvailableItems(options, analytics, 4, 'popular') };
+      }
+
+      const ingWords = findIngredientWords(t);
+      if (ingWords.length) {
+        const wantsNo = t.includes('without') || t.includes('no ') || t.includes("don't want") || t.includes('dont want');
+        const options = state.menu.filter(x => {
+          const ingredients = x.ingredients.join(' ').toLowerCase();
+          return x.available && (wantsNo ? !ingWords.some(w => ingredients.includes(w)) : ingWords.some(w => ingredients.includes(w)));
+        });
+        const phrase = wantsNo ? `without ${ingWords.join(', ')}` : `with ${ingWords.join(', ')}`;
+        return {
+          text: `Here are available options ${phrase}, ranked using the demo analytics:`,
+          items: topAvailableItems(options, analytics, 4, 'ingredient')
+        };
+      }
+
       return {
-        text: `Here are my top ${label} picks for you:`,
-        items: picks.map(x => ({id: x.id, name: x.name, price: x.price, reason: x.desc.split('.')[0]}))
+        text: "I can help, but I need one more clue. Tell me your budget, a category, an ingredient, or the vibe you want: spicy, sweet, fresh, filling, cheap, popular, or something to pair with another item.",
+        items: topAvailableItems(analytics.topItemsByQty.map(x => x.item), analytics, 3, 'popular')
       };
     }
 
