@@ -226,7 +226,7 @@
     .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
     .full { grid-column: 1 / -1; }
 
-    .status-steps { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 18px 0; }
+    .status-steps { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin: 18px 0; }
     .step {
       border: 1px solid var(--line);
       background: white;
@@ -355,6 +355,47 @@
     .mini-meter{width:54px;height:9px;border-radius:99px;background:#c9c9c9}
     @media(max-width:850px){.delivery-grid,.delivery-card-main{grid-template-columns:1fr}.delivery-top{align-items:flex-start;flex-direction:column}.delivery-tabs{gap:12px}.shift-row{grid-template-columns:1fr}.delivery-actions button{width:100%}}
 
+    /* Manager internal shell */
+    .mgr-shell{max-width:980px;margin:auto}
+    .mgr-topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:12px 20px;box-shadow:var(--shadow);margin-bottom:18px;flex-wrap:wrap}
+    .mgr-logo{width:44px;height:44px;border-radius:14px;border:1px solid #f0c5c5;display:grid;place-items:center;font-weight:900;background:#fce8e8;color:#a02020;font-size:13px}
+    .mgr-tabs{display:flex;gap:28px;align-items:center}
+    .mgr-tabs button{background:transparent;border-radius:0;border-bottom:3px solid transparent;padding:10px 4px;color:var(--muted);font-weight:700;font-size:15px}
+    .mgr-tabs button.active{color:var(--dark);border-bottom-color:var(--dark)}
+    .mgr-toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+    .mgr-toolbar select,.mgr-search{padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:white;outline:none;font-size:14px;font-family:inherit}
+    .mgr-search{flex:1;min-width:180px;max-width:340px}
+    .mgr-bulk-bar{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 14px;margin-bottom:14px;flex-wrap:wrap}
+    .mgr-order-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px 18px;margin-bottom:12px;box-shadow:0 4px 12px rgba(78,45,20,.07)}
+    .mgr-order-card.muted-card{opacity:.5;box-shadow:none}
+    .mgr-order-main{display:grid;grid-template-columns:24px 1fr auto;gap:14px;align-items:start}
+    .mgr-order-info{display:flex;flex-direction:column;gap:5px}
+    .mgr-order-actions{display:flex;flex-direction:column;gap:6px;align-items:stretch;min-width:150px}
+    .mgr-order-actions button{width:100%;text-align:center}
+    .status-tag{font-size:12px;padding:4px 9px;border-radius:999px;font-weight:700;border:1px solid var(--line);display:inline-block}
+    .s-received{background:#fff8e6;color:#8a5e00;border-color:#f5d78a}
+    .s-accepted{background:#e8f4ff;color:#1a5fa8;border-color:#aacfef}
+    .s-preparing{background:#fff0e0;color:#b85c00;border-color:#f5c68a}
+    .s-assigned{background:#f0e8ff;color:#6a2fa0;border-color:#c9a8ef}
+    .s-transit{background:#e8f7ff;color:#1a7a9a;border-color:#9ad8ef}
+    .s-delivered{background:#e8fff3;color:#1a7a4a;border-color:#9aefc4}
+    .s-rejected{background:#fff0f0;color:#9a1a1a;border-color:#efaaaa}
+    /* Toggle switch */
+    .avail-toggle{display:flex;align-items:center;gap:10px}
+    .toggle-sw{position:relative;display:inline-block;width:48px;height:26px;cursor:pointer;flex-shrink:0}
+    .toggle-sw input{opacity:0;width:0;height:0;position:absolute}
+    .toggle-track{position:absolute;inset:0;background:#ccc;border-radius:99px;transition:.2s}
+    .toggle-sw input:checked+.toggle-track{background:var(--green)}
+    .toggle-thumb{position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2);pointer-events:none}
+    .toggle-sw input:checked~.toggle-thumb{left:25px}
+    /* AI chips */
+    .chat-chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+    .chip{padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:13px;cursor:pointer;font-family:inherit;transition:background .15s}
+    .chip:hover{background:var(--soft)}
+    /* AI item card in chat */
+    .ai-item-row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--line)}
+    @media(max-width:850px){.mgr-topbar{flex-direction:column;align-items:flex-start}.mgr-order-main{grid-template-columns:24px 1fr}.mgr-order-actions{flex-direction:row;flex-wrap:wrap;min-width:unset;width:100%}.mgr-order-actions button{width:auto}}
+    @media(max-width:560px){.mgr-order-main{grid-template-columns:1fr}.mgr-order-actions{align-items:flex-start}}
   </style>
 </head>
 <body>
@@ -406,7 +447,8 @@
       {id: 'd3', name: 'Omar', phone: '0600-555-666', available: false}
     ];
 
-    const statusOrder = ['Order received', 'Accepted', 'Preparing', 'Out for delivery', 'Delivered'];
+    const statusOrder = ['Order received', 'Accepted', 'Preparing', 'Assigned to delivery', 'Out for delivery', 'Delivered'];
+    const CHAT_KEY = 'for_you_chat_v1';
 
     let state = loadState();
     let currentPage = 'home';
@@ -417,6 +459,18 @@
     let managerTab = 'orders';
     let menuFilter = 'All';
     let searchText = '';
+    let mgrDateFilter = 'All';
+    let mgrStatusFilter = 'All';
+    let mgrSearch = '';
+    let selectedOrders = new Set();
+
+    // Chat uses sessionStorage — fresh per browser session, persistent within same tab
+    function loadChat() {
+      try { const s = sessionStorage.getItem(CHAT_KEY); if (s) return JSON.parse(s); } catch(e) {}
+      return [{from:'bot', text:'Hi, welcome to For You Restaurant! How can I help you today? 🍽️', items:[]}];
+    }
+    function saveChat() { try { sessionStorage.setItem(CHAT_KEY, JSON.stringify(chatMessages)); } catch(e) {} }
+    let chatMessages = loadChat();
 
     function loadState() {
       const saved = localStorage.getItem(STORE_KEY);
@@ -427,26 +481,44 @@
         orders: [
           {
             id: 'FY-1001', createdAt: new Date(Date.now() - 1000 * 60 * 42).toISOString(), status: 'Accepted',
+            acceptedAt: Date.now() - 1000 * 60 * 42,
             customer: {name: 'Sample Customer', phone: '0612-000-111', address: 'AUI Campus, Ifrane', instructions: 'Call when outside'},
-            payment: 'Cash', deliveryId: 'd1',
+            payment: 'Cash', deliveryId: '', deliveryAccepted: false,
             items: [{id: 'chicken-tacos', name: 'Chicken Tacos', price: 45, qty: 2}, {id: 'mango-juice', name: 'Mango Juice', price: 22, qty: 1}], total: 112
           },
           {
             id: 'FY-1002', createdAt: new Date(Date.now() - 1000 * 60 * 18).toISOString(), status: 'Order received',
+            acceptedAt: null,
             customer: {name: 'Test Order', phone: '0600-222-333', address: 'Downtown Ifrane', instructions: ''},
-            payment: 'Card at delivery', deliveryId: '',
+            payment: 'Card at delivery', deliveryId: '', deliveryAccepted: false,
             items: [{id: 'burger-classic', name: 'Classic Burger', price: 48, qty: 1}, {id: 'fries', name: 'Fries', price: 15, qty: 1}], total: 63
           }
         ],
         deliveryPeople,
-        lastOrderId: 'FY-1002',
-        chat: [{from: 'bot', text: 'Hi. Tell me what you feel like eating: light, very hungry, spicy, drink, dessert, or no cheese.'}]
+        lastOrderId: 'FY-1002'
       };
       localStorage.setItem(STORE_KEY, JSON.stringify(seed));
       return seed;
     }
 
     function saveState() { localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
+
+    // 5-minute timer: auto-advance Accepted → Preparing
+    function checkPrepTimers() {
+      let changed = false;
+      state.orders.forEach(o => {
+        if (o.status === 'Accepted' && o.acceptedAt) {
+          if (Date.now() - o.acceptedAt >= 5 * 60 * 1000) {
+            o.status = 'Preparing';
+            changed = true;
+          }
+        }
+      });
+      if (changed) { saveState(); renderAll(); }
+    }
+    checkPrepTimers();
+    setInterval(checkPrepTimers, 30000);
+
     function money(n) { return `${n} MAD`; }
     function byId(id) { return document.getElementById(id); }
     function getMenuItem(id) { return state.menu.find(x => x.id === id); }
@@ -639,6 +711,7 @@
       const id = `FY-${Math.floor(1000 + Math.random() * 9000)}`;
       const order = {
         id, createdAt: new Date().toISOString(), status: 'Order received',
+        acceptedAt: null, deliveryAccepted: false,
         customer: {name, phone, address, instructions}, payment, deliveryId: '',
         items: items.map(x => ({id: x.id, name: x.name, price: x.price, qty: x.qty})), total: cartTotal()
       };
@@ -672,9 +745,12 @@
 
     function trackingHtml(order) {
       const isCancelled = order.status === 'Cancelled' || order.status === 'Rejected';
+      const isAcceptedWaiting = order.status === 'Accepted' && order.acceptedAt;
+      const minsLeft = isAcceptedWaiting ? Math.max(0, 5 - Math.round((Date.now() - order.acceptedAt) / 60000)) : 0;
       return `
         <div class="card">
-          <div class="order-head"><div><h3>Order ${order.id}</h3><p>${order.customer.name} - ${money(order.total)}</p></div><span class="tag ${isCancelled ? 'red' : 'green'}">${order.status}</span></div>
+          <div class="order-head"><div><h3>Order ${order.id}</h3><p>${order.customer.name} - ${money(order.total)}</p></div><span class="status-tag ${statusTagClass(order.status)}">${order.status}</span></div>
+          ${isAcceptedWaiting ? `<div class="notice" style="margin:12px 0">⏱ Your order was accepted. Kitchen starts in ~${minsLeft} min.</div>` : ''}
           <div class="status-steps">${statusOrder.map(s => `<div class="step ${isCancelled ? 'cancelled' : (statusOrder.indexOf(s) <= statusOrder.indexOf(order.status) ? 'done' : '')}">${s}</div>`).join('')}</div>
           <div class="mini-line"><strong>Payment</strong><span>${order.payment}</span></div>
           <div class="mini-line"><strong>Delivery person</strong><span>${order.deliveryId ? getDeliveryName(order.deliveryId) : 'Not assigned yet'}</span></div>
@@ -683,15 +759,25 @@
         </div>`;
     }
 
+    function statusTagClass(s) {
+      if (s === 'Order received') return 's-received';
+      if (s === 'Accepted') return 's-accepted';
+      if (s === 'Preparing') return 's-preparing';
+      if (s === 'Assigned to delivery') return 's-assigned';
+      if (s === 'Out for delivery') return 's-transit';
+      if (s === 'Delivered') return 's-delivered';
+      return 's-rejected';
+    }
+
     function renderAssistant() {
       byId('assistant').innerHTML = `
         <h2>AI Menu Assistant</h2>
-        <p>This is a free rule-based assistant for the demo. It recommends only available menu items.</p>
-        <div class="notice">No paid AI API is used here. This keeps the prototype free.</div>
+        <p>Rule-based assistant — recommends only real, available menu items. Conversation is saved for this browser session.</p>
+        <div class="notice">No paid AI API used. This keeps the prototype free and deployable on GitHub Pages.</div>
         <div class="card">
-          <div id="chatBox" class="chat-box">${state.chat.map(m => `<div class="msg ${m.from === 'user' ? 'user-msg' : 'bot-msg'}">${m.text}</div>`).join('')}</div>
-          <div class="row" style="margin-bottom:10px">
-            ${['I want something light', 'I am very hungry', 'I want a drink', 'No cheese please'].map(p => `<button class="secondary" onclick="quickPrompt('${p}')">${p}</button>`).join('')}
+          <div id="chatBox" class="chat-box">${chatMessages.map(renderChatMsg).join('')}</div>
+          <div class="chat-chips">
+            ${['Something sweet','Something spicy','Something filling','Something cheap','I want sushi','I want a drink'].map(p=>`<button class="chip" onclick="quickPrompt('${p}')">${p}</button>`).join('')}
           </div>
           <div class="row"><input id="chatInput" class="input" placeholder="Type your request..." onkeydown="if(event.key==='Enter') sendChat()" /><button class="primary" onclick="sendChat()">Send</button></div>
         </div>
@@ -699,30 +785,47 @@
       setTimeout(() => { const box = byId('chatBox'); if (box) box.scrollTop = box.scrollHeight; }, 10);
     }
 
+    function renderChatMsg(m) {
+      if (m.from === 'user') return `<div class="msg user-msg">${escapeHtml(m.text)}</div>`;
+      let html = `<div class="msg bot-msg"><div>${m.text}</div>`;
+      if (m.items && m.items.length) {
+        html += m.items.map(item => `<div class="ai-item-row"><div><strong>${item.name}</strong><br><span style="color:var(--muted);font-size:13px">${money(item.price)} · ${item.reason}</span></div><button class="primary" style="font-size:12px;padding:6px 10px;white-space:nowrap" onclick="addToCart('${item.id}')">Add to Cart</button></div>`).join('');
+      }
+      html += `</div>`;
+      return html;
+    }
+
     function quickPrompt(text) { byId('chatInput').value = text; sendChat(); }
     function sendChat() {
       const input = byId('chatInput');
       const text = input.value.trim();
       if (!text) return;
-      state.chat.push({from: 'user', text});
-      state.chat.push({from: 'bot', text: assistantReply(text)});
+      chatMessages.push({from: 'user', text, items: []});
+      const reply = assistantReply(text);
+      chatMessages.push({from: 'bot', text: reply.text, items: reply.items});
       input.value = '';
-      saveState(); renderAssistant();
+      saveChat();
+      renderAssistant();
     }
 
     function assistantReply(text) {
       const t = text.toLowerCase();
-      let picks = [];
-      if (t.includes('light') || t.includes('calorie') || t.includes('healthy')) picks = state.menu.filter(x => ['Salads', 'Sushi'].includes(x.category));
-      else if (t.includes('hungry') || t.includes('big') || t.includes('full')) picks = state.menu.filter(x => ['Plates', 'Burgers', 'Pasta'].includes(x.category));
-      else if (t.includes('drink') || t.includes('juice')) picks = state.menu.filter(x => x.category === 'Drinks');
-      else if (t.includes('dessert') || t.includes('sweet')) picks = state.menu.filter(x => x.category === 'Desserts');
-      else if (t.includes('cheese')) picks = state.menu.filter(x => !x.ingredients.includes('cheese'));
-      else if (t.includes('spicy')) picks = state.menu.filter(x => ['Tacos', 'Burgers'].includes(x.category));
-      else picks = state.menu.filter(x => x.available).slice(0, 3);
+      let picks = [], label = '';
+      if (t.includes('sweet') || t.includes('dessert')) { picks = state.menu.filter(x => x.category === 'Desserts'); label = 'sweet treat'; }
+      else if (t.includes('spicy')) { picks = state.menu.filter(x => ['Tacos','Burgers'].includes(x.category)); label = 'bold & spicy'; }
+      else if (t.includes('filling') || t.includes('hungry') || t.includes('full') || t.includes('big')) { picks = state.menu.filter(x => ['Plates','Burgers','Pasta'].includes(x.category)); label = 'hearty & filling'; }
+      else if (t.includes('cheap') || t.includes('budget') || t.includes('affordable')) { picks = [...state.menu].sort((a,b)=>a.price-b.price); label = 'budget-friendly'; }
+      else if (t.includes('sushi')) { picks = state.menu.filter(x => x.category === 'Sushi'); label = 'fresh sushi'; }
+      else if (t.includes('drink') || t.includes('juice') || t.includes('beverage')) { picks = state.menu.filter(x => x.category === 'Drinks'); label = 'refreshing drink'; }
+      else if (t.includes('light') || t.includes('healthy') || t.includes('calorie')) { picks = state.menu.filter(x => ['Salads','Sushi'].includes(x.category)); label = 'light & healthy'; }
+      else if (t.includes('cheese') && (t.includes('no') || t.includes('without'))) { picks = state.menu.filter(x => !x.ingredients.includes('cheese')); label = 'cheese-free'; }
+      else { picks = state.menu.filter(x => x.available); label = 'popular today'; }
       picks = picks.filter(x => x.available).slice(0, 3);
-      if (!picks.length) return 'I could not find an available match. Please check the menu or ask for another type of meal.';
-      return `I recommend: ${picks.map(x => `${x.name} (${money(x.price)})`).join(', ')}. You can add them from the Menu page.`;
+      if (!picks.length) return { text: "I couldn't find an available match. Try asking: something sweet, spicy, filling, a drink, or sushi!", items: [] };
+      return {
+        text: `Here are my top ${label} picks for you:`,
+        items: picks.map(x => ({id: x.id, name: x.name, price: x.price, reason: x.desc.split('.')[0]}))
+      };
     }
 
     function renderManager() {
@@ -731,15 +834,24 @@
         return;
       }
       byId('manager').innerHTML = `
-        <h2>Manager Dashboard</h2>
-        <div class="tabs">
-          ${['orders', 'menu', 'analytics'].map(t => `<button class="secondary ${managerTab === t ? 'active' : ''}" onclick="managerTab='${t}'; renderManager()">${t[0].toUpperCase()+t.slice(1)}</button>`).join('')}
-          <button class="ghost" onclick="managerLoggedIn=false; renderManager()">Logout</button>
-          <button class="danger" onclick="resetDemo()">Reset Demo Data</button>
+        <div class="mgr-shell">
+          <div class="mgr-topbar">
+            <div class="row"><div class="mgr-logo">FY</div><strong>Manager Dashboard</strong></div>
+            <div class="mgr-tabs">
+              <button class="${managerTab==='orders'?'active':''}" onclick="managerTab='orders';renderManager()">Orders</button>
+              <button class="${managerTab==='menu'?'active':''}" onclick="managerTab='menu';renderManager()">Menu</button>
+              <button class="${managerTab==='analytics'?'active':''}" onclick="managerTab='analytics';renderManager()">Dashboard</button>
+            </div>
+            <div class="row">
+              <button class="ghost" onclick="managerLoggedIn=false;renderManager()">Logout</button>
+              <button class="danger" onclick="resetDemo()">Reset Demo</button>
+            </div>
+          </div>
+          ${managerTab==='orders' ? managerOrdersHtml() : managerTab==='menu' ? managerMenuHtml() : managerAnalyticsHtml()}
         </div>
-        ${managerTab === 'orders' ? managerOrdersHtml() : managerTab === 'menu' ? managerMenuHtml() : managerAnalyticsHtml()}
       `;
     }
+
 
     function loginHtml(title, help, inputId, action) {
       return `<div class="card login-box"><h2>${title}</h2><p>${help}</p><input id="${inputId}" class="input" type="password" placeholder="Enter PIN" onkeydown="if(event.key==='Enter') ${action}" /><button class="primary" style="width:100%;margin-top:12px" onclick="${action}">Enter</button></div>`;
@@ -750,63 +862,210 @@
       else alert('Wrong PIN. Use 1234 for the demo.');
     }
 
-    function managerOrdersHtml() {
-      return `<div class="card"><h3>Order Queue</h3><p>Accept orders, update their status, and assign delivery personnel.</p>${state.orders.map(orderCard).join('') || '<p>No orders yet.</p>'}</div>`;
+    function getFilteredOrders() {
+      const now = new Date();
+      return state.orders.filter(o => {
+        if (mgrDateFilter === 'Today') { if (new Date(o.createdAt).toDateString() !== now.toDateString()) return false; }
+        else if (mgrDateFilter === 'Week') { if (new Date(o.createdAt) < new Date(now - 7*24*60*60*1000)) return false; }
+        else if (mgrDateFilter === 'Month') { if (new Date(o.createdAt) < new Date(now - 30*24*60*60*1000)) return false; }
+        if (mgrStatusFilter !== 'All' && o.status !== mgrStatusFilter) return false;
+        if (mgrSearch) { const s = mgrSearch.toLowerCase(); if (!o.id.toLowerCase().includes(s) && !o.customer.name.toLowerCase().includes(s) && !o.customer.address.toLowerCase().includes(s)) return false; }
+        return true;
+      });
     }
 
-    function orderCard(o) {
-      return `<div class="order-card">
-        <div class="order-head"><div><strong>${o.id}</strong><br><span class="tag">${timeAgo(o.createdAt)}</span> <span class="tag">${o.items.length} item types</span></div><span class="tag ${o.status === 'Cancelled' || o.status === 'Rejected' ? 'red' : 'green'}">${o.status}</span></div>
-        <div><strong>${o.customer.name}</strong> - ${o.customer.phone}<br><span>${o.customer.address}</span></div>
-        <div>${o.items.map(i => `${i.qty}x ${i.name}`).join(', ')}</div>
-        <div class="mini-line"><strong>Total</strong><span>${money(o.total)} - ${o.payment}</span></div>
-        <div class="row">
-          <select class="input" style="max-width:210px" onchange="assignDelivery('${o.id}', this.value)">
-            <option value="">Assign delivery person</option>
-            ${state.deliveryPeople.map(d => `<option value="${d.id}" ${o.deliveryId === d.id ? 'selected' : ''}>${d.name} ${d.available ? '(Available)' : '(Unavailable)'}</option>`).join('')}
+    function managerOrdersHtml() {
+      const filtered = getFilteredOrders();
+      const allSelected = filtered.length > 0 && filtered.every(o => selectedOrders.has(o.id));
+      return `
+        <h2 style="margin-bottom:14px">Orders</h2>
+        <div class="mgr-toolbar">
+          <select onchange="mgrDateFilter=this.value;renderManager()">
+            ${['All','Today','Week','Month'].map(v=>`<option value="${v}" ${mgrDateFilter===v?'selected':''}>${v==='All'?'Date Range ▼':v}</option>`).join('')}
+          </select>
+          <select onchange="mgrStatusFilter=this.value;renderManager()">
+            ${['All','Order received','Accepted','Preparing','Assigned to delivery','Out for delivery','Delivered','Rejected'].map(v=>`<option value="${v}" ${mgrStatusFilter===v?'selected':''}>${v==='All'?'Order Status ▼':v}</option>`).join('')}
+          </select>
+          <input class="mgr-search" placeholder="🔍 Search orders..." value="${escapeHtml(mgrSearch)}" oninput="mgrSearch=this.value;renderManager()" />
+          <select onchange="bulkAction(this.value);this.value=''">
+            <option value="">Bulk Actions ▼</option>
+            <option value="accept">Accept Selected</option>
+            <option value="reject">Reject Selected</option>
           </select>
         </div>
-        <div class="order-actions">
-          <button class="success" onclick="updateOrderStatus('${o.id}','Accepted')">Accept</button>
-          <button class="secondary" onclick="updateOrderStatus('${o.id}','Preparing')">Preparing</button>
-          <button class="secondary" onclick="updateOrderStatus('${o.id}','Out for delivery')">Out for delivery</button>
-          <button class="success" onclick="updateOrderStatus('${o.id}','Delivered')">Delivered</button>
-          <button class="danger" onclick="updateOrderStatus('${o.id}','Rejected')">Reject</button>
-          <button class="ghost" onclick="openOrderDetails('${o.id}')">Details</button>
+        <div class="mgr-bulk-bar">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+            <input type="checkbox" ${allSelected?'checked':''} onchange="toggleSelectAll()" style="width:16px;height:16px" />
+            <span>Select All</span>
+          </label>
+          <span style="color:var(--muted);font-size:13px">${selectedOrders.size} selected · ${filtered.length} orders</span>
+        </div>
+        ${filtered.map(mgrOrderCard).join('') || '<div class="mgr-order-card"><p>No orders match these filters.</p></div>'}
+        <div class="notice" style="margin-top:18px">Demo mode: data is stored locally in this browser.</div>
+      `;
+    }
+
+    function toggleSelectAll() {
+      const filtered = getFilteredOrders();
+      if (filtered.every(o => selectedOrders.has(o.id))) { filtered.forEach(o => selectedOrders.delete(o.id)); }
+      else { filtered.forEach(o => selectedOrders.add(o.id)); }
+      renderManager();
+    }
+
+    function toggleSelectOrder(id) {
+      if (selectedOrders.has(id)) selectedOrders.delete(id); else selectedOrders.add(id);
+      renderManager();
+    }
+
+    function bulkAction(action) {
+      if (!action || !selectedOrders.size) return;
+      if (action === 'accept') {
+        selectedOrders.forEach(id => { const o = state.orders.find(x=>x.id===id); if (o && o.status==='Order received') { o.status='Accepted'; o.acceptedAt=Date.now(); } });
+      } else if (action === 'reject') {
+        if (!confirm(`Reject ${selectedOrders.size} selected orders?`)) return;
+        selectedOrders.forEach(id => { const o = state.orders.find(x=>x.id===id); if (o && !['Delivered','Rejected','Cancelled'].includes(o.status)) o.status='Rejected'; });
+      }
+      selectedOrders.clear(); saveState(); renderAll();
+    }
+
+    function mgrOrderCard(o) {
+      const isInactive = ['Delivered','Rejected','Cancelled'].includes(o.status);
+      const isSelected = selectedOrders.has(o.id);
+      return `<div class="mgr-order-card ${isInactive?'muted-card':''}">
+        <div class="mgr-order-main">
+          <input type="checkbox" ${isSelected?'checked':''} onchange="toggleSelectOrder('${o.id}')" style="width:16px;height:16px;margin-top:3px;cursor:pointer" />
+          <div class="mgr-order-info">
+            <div class="row" style="gap:8px"><strong>${o.id}</strong><span class="status-tag ${statusTagClass(o.status)}">${o.status}</span></div>
+            <div style="font-size:13px">${o.items.map(i=>`${i.qty}x ${i.name}`).join(', ')}</div>
+            <div class="stat-label">⏱ ${timeAgo(o.createdAt)} · ${money(o.total)} · ${o.payment}</div>
+            <div class="stat-label">📍 ${o.customer.name} — ${o.customer.phone} — ${o.customer.address}</div>
+            ${o.status==='Accepted'&&o.acceptedAt?`<div class="stat-label" style="color:var(--accent)">⏳ Kitchen starts in ~${Math.max(0,5-Math.round((Date.now()-o.acceptedAt)/60000))} min</div>`:''}
+          </div>
+          <div class="mgr-order-actions">${mgrOrderActions(o)}</div>
         </div>
       </div>`;
     }
 
+    function mgrOrderActions(o) {
+      switch(o.status) {
+        case 'Order received':
+          return `<button class="success" onclick="mgAccept('${o.id}')">Accept</button><button class="danger" onclick="mgReject('${o.id}')">Reject</button><button class="ghost" onclick="openOrderDetails('${o.id}')">Details</button>`;
+        case 'Accepted':
+          return `<div class="notice" style="margin:0;padding:7px 10px;font-size:12px">⏳ Waiting for kitchen timer...</div><button class="ghost" onclick="openOrderDetails('${o.id}')">Details</button>`;
+        case 'Preparing':
+          return mgrAssignHtml(o) + `<button class="ghost" style="margin-top:4px" onclick="openOrderDetails('${o.id}')">Details</button>`;
+        case 'Assigned to delivery':
+          return `<span class="status-tag s-assigned" style="font-size:11px">Driver: ${getDeliveryName(o.deliveryId)}</span><button class="primary" onclick="updateOrderStatus('${o.id}','Out for delivery')">Out for Delivery</button><button class="ghost" onclick="showReassignModal('${o.id}')">Reassign</button><button class="ghost" onclick="openOrderDetails('${o.id}')">Details</button>`;
+        case 'Out for delivery':
+          return `<button class="ghost" onclick="openOrderDetails('${o.id}')">View Details</button>`;
+        default:
+          return `<span class="tag">Completed</span>`;
+      }
+    }
+
+    function mgrAssignHtml(o) {
+      const avail = state.deliveryPeople.filter(d=>d.available);
+      if (!avail.length) return `<div class="notice" style="margin:0;padding:7px 10px;font-size:12px">⚠️ No available delivery person right now.</div>`;
+      return `<div class="row" style="flex-wrap:wrap;gap:6px">
+        <select id="as_${o.id}" class="input" style="max-width:160px;padding:8px 10px;font-size:13px">
+          <option value="">Assign delivery...</option>
+          ${state.deliveryPeople.map(d=>`<option value="${d.id}" ${!d.available?'disabled':''} ${o.deliveryId===d.id?'selected':''}>${d.name} ${d.available?'':'(Unavailable)'}</option>`).join('')}
+        </select>
+        <button class="secondary" style="padding:8px 12px" onclick="doAssign('${o.id}')">Assign</button>
+      </div>`;
+    }
+
+    function doAssign(orderId) {
+      const sel = byId('as_'+orderId); if (!sel) return;
+      const deliveryId = sel.value; if (!deliveryId) return alert('Select a delivery person.');
+      const driver = state.deliveryPeople.find(d=>d.id===deliveryId);
+      if (driver && !driver.available) return alert('This delivery person is currently unavailable.');
+      const o = state.orders.find(x=>x.id===orderId);
+      if (o) { o.deliveryId = deliveryId; o.status = 'Assigned to delivery'; }
+      saveState(); renderAll();
+    }
+
+    function showReassignModal(id) {
+      const o = state.orders.find(x=>x.id===id);
+      showModal(`<h2>Reassign Order ${o.id}</h2>
+        <p>Current driver: <strong>${getDeliveryName(o.deliveryId)}</strong></p>
+        <select id="reassignSel" class="input">
+          <option value="">Select driver...</option>
+          ${state.deliveryPeople.map(d=>`<option value="${d.id}" ${!d.available?'disabled':''}>${d.name} ${d.available?'(Available)':'(Unavailable)'}</option>`).join('')}
+        </select>
+        <div class="row" style="margin-top:14px">
+          <button class="primary" onclick="doReassign('${id}')">Reassign</button>
+          <button class="secondary" onclick="closeModal()">Cancel</button>
+        </div>`);
+    }
+
+    function doReassign(orderId) {
+      const sel = byId('reassignSel'); if (!sel || !sel.value) return alert('Select a driver.');
+      const driver = state.deliveryPeople.find(d=>d.id===sel.value);
+      if (driver && !driver.available) return alert('That driver is unavailable.');
+      const o = state.orders.find(x=>x.id===orderId);
+      if (o) { o.deliveryId = sel.value; o.status = 'Assigned to delivery'; }
+      saveState(); renderAll(); closeModal();
+    }
+
+    function mgAccept(id) {
+      const o = state.orders.find(x=>x.id===id); if (!o) return;
+      o.status = 'Accepted'; o.acceptedAt = Date.now();
+      saveState(); renderAll();
+    }
+
+    function mgReject(id) {
+      if (!confirm('Reject this order?')) return;
+      const o = state.orders.find(x=>x.id===id); if (!o) return;
+      o.status = 'Rejected'; saveState(); renderAll();
+    }
+
     function openOrderDetails(id) {
-      const o = state.orders.find(x => x.id === id);
+      const o = state.orders.find(x=>x.id===id);
       showModal(`<h2>Order ${o.id}</h2>
-        <div class="mini-line"><strong>Status</strong><span>${o.status}</span></div>
+        <div class="mini-line"><strong>Status</strong><span class="status-tag ${statusTagClass(o.status)}">${o.status}</span></div>
         <div class="mini-line"><strong>Customer</strong><span>${o.customer.name}</span></div>
         <div class="mini-line"><strong>Phone</strong><span>${o.customer.phone}</span></div>
         <div class="mini-line"><strong>Address</strong><span>${o.customer.address}</span></div>
         <div class="mini-line"><strong>Instructions</strong><span>${o.customer.instructions || 'None'}</span></div>
         <div class="mini-line"><strong>Payment</strong><span>${o.payment}</span></div>
-        <div class="mini-line"><strong>Items</strong><span>${o.items.map(i => `${i.qty}x ${i.name}`).join(', ')}</span></div>
+        <div class="mini-line"><strong>Items</strong><span>${o.items.map(i=>`${i.qty}x ${i.name}`).join(', ')}</span></div>
         <div class="mini-line"><strong>Total</strong><span>${money(o.total)}</span></div>
         <button class="secondary" style="margin-top:14px" onclick="closeModal()">Close</button>`);
     }
 
     function updateOrderStatus(id, status) {
-      const o = state.orders.find(x => x.id === id);
-      if (!o) return;
+      const o = state.orders.find(x=>x.id===id); if (!o) return;
       o.status = status;
-      if (status === 'Out for delivery' && !o.deliveryId) alert('Tip: assign a delivery person before dispatching.');
       saveState(); renderAll();
     }
 
     function assignDelivery(orderId, deliveryId) {
-      const o = state.orders.find(x => x.id === orderId);
-      if (o) { o.deliveryId = deliveryId; if (deliveryId && o.status === 'Preparing') o.status = 'Out for delivery'; }
+      const driver = state.deliveryPeople.find(d=>d.id===deliveryId);
+      if (driver && !driver.available) return alert('This delivery person is unavailable.');
+      const o = state.orders.find(x=>x.id===orderId);
+      if (o) { o.deliveryId = deliveryId; if (deliveryId) o.status = 'Assigned to delivery'; }
       saveState(); renderAll();
     }
 
     function managerMenuHtml() {
-      return `<div class="card"><h3>Menu Availability Control</h3><p>Toggle items available or unavailable. Customers cannot order unavailable meals.</p>${state.menu.map(item => `<div class="staff-line"><div><strong>${item.name}</strong><br><span class="tag">${item.category} - ${money(item.price)}</span></div><button class="${item.available ? 'success' : 'danger'}" onclick="toggleMenuAvailability('${item.id}')">${item.available ? 'Available' : 'Unavailable'}</button></div>`).join('')}</div>`;
+      return `<h2 style="margin-bottom:14px">Menu Availability</h2>
+        <p style="margin-bottom:16px">Toggle items on or off. Unavailable items cannot be ordered by customers.</p>
+        <div class="mgr-order-card">
+          ${state.menu.map(item => `
+            <div class="staff-line">
+              <div><strong>${item.name}</strong><br><span class="tag">${item.category} · ${money(item.price)}</span></div>
+              <label class="avail-toggle">
+                <span style="font-size:13px;color:${item.available?'var(--green)':'var(--red)'}">${item.available?'Available':'Unavailable'}</span>
+                <label class="toggle-sw">
+                  <input type="checkbox" ${item.available?'checked':''} onchange="toggleMenuAvailability('${item.id}')" />
+                  <span class="toggle-track"></span>
+                  <span class="toggle-thumb"></span>
+                </label>
+              </label>
+            </div>`).join('')}
+        </div>
+        <div class="notice" style="margin-top:14px">Demo mode: data is stored locally in this browser.</div>`;
     }
 
     function toggleMenuAvailability(id) {
@@ -815,6 +1074,7 @@
       saveState(); renderAll();
     }
 
+
     function managerAnalyticsHtml() {
       const valid = state.orders.filter(o => !['Rejected', 'Cancelled'].includes(o.status));
       const revenue = valid.reduce((s, o) => s + o.total, 0);
@@ -822,16 +1082,21 @@
       valid.forEach(o => o.items.forEach(i => itemCounts[i.name] = (itemCounts[i.name] || 0) + i.qty));
       const top = Object.entries(itemCounts).sort((a,b) => b[1]-a[1]).slice(0,5);
       const peak = getPeakHours(valid);
-      return `<div class="grid-2">
-        <div class="card"><h3>Key Metrics</h3>
-          <div class="stat-box"><div class="stat-value">${money(revenue)}</div><div class="stat-label">Total revenue in demo</div></div><br>
-          <div class="stat-box"><div class="stat-value">${valid.length}</div><div class="stat-label">Valid orders</div></div><br>
-          <div class="stat-box"><div class="stat-value">${valid.length ? money(Math.round(revenue / valid.length)) : '0 MAD'}</div><div class="stat-label">Average order value</div></div>
+      const catCounts = {};
+      valid.forEach(o => o.items.forEach(i => { const m = state.menu.find(x=>x.id===i.id); if (m) catCounts[m.category] = (catCounts[m.category]||0) + i.qty; }));
+      const cats = Object.entries(catCounts).sort((a,b)=>b[1]-a[1]);
+      return `<h2 style="margin-bottom:14px">Dashboard</h2>
+        <div class="grid-2">
+          <div class="card"><h3>Key Metrics</h3>
+            <div class="stat-box"><div class="stat-value">${money(revenue)}</div><div class="stat-label">Total revenue in demo</div></div><br>
+            <div class="stat-box"><div class="stat-value">${valid.length}</div><div class="stat-label">Total orders</div></div><br>
+            <div class="stat-box"><div class="stat-value">${valid.length ? money(Math.round(revenue / valid.length)) : '0 MAD'}</div><div class="stat-label">Average order value</div></div>
+          </div>
+          <div class="card"><h3>Most Ordered Items</h3>${top.length ? top.map(([name,count]) => `<div class="mini-line"><span>${name}</span><strong>${count}</strong></div>`).join('') : '<p>No order data yet.</p>'}</div>
+          <div class="card"><h3>Peak Demand Times</h3>${peak.map(([hour,count]) => `<div class="mini-line"><span>${hour}:00–${hour}:59</span><strong>${count} orders</strong></div>`).join('') || '<p>No data yet.</p>'}</div>
+          <div class="card"><h3>Category Breakdown</h3>${cats.length ? cats.map(([cat,count]) => `<div class="mini-line"><span>${cat}</span><strong>${count} items</strong></div>`).join('') : '<p>No order data yet.</p>'}</div>
         </div>
-        <div class="card"><h3>Most Ordered Items</h3>${top.length ? top.map(([name,count]) => `<div class="mini-line"><span>${name}</span><strong>${count}</strong></div>`).join('') : '<p>No order data yet.</p>'}</div>
-        <div class="card"><h3>Peak Demand Times</h3>${peak.map(([hour,count]) => `<div class="mini-line"><span>${hour}:00 - ${hour}:59</span><strong>${count} orders</strong></div>`).join('') || '<p>No data yet.</p>'}</div>
-        <div class="card"><h3>Operational Insight</h3><p>The dashboard helps the manager monitor order volume, popular items, and delivery progress without relying only on memory.</p></div>
-      </div>`;
+        <div class="notice" style="margin-top:18px">Demo mode: data is stored locally in this browser.</div>`;
     }
 
     function getPeakHours(orders) {
@@ -872,29 +1137,48 @@ function renderDelivery() {
     }
 
     function deliveryOrdersPage(driver) {
-      const visible = state.orders.filter(o => o.deliveryId === driver.id || ['Order received','Accepted','Out for delivery','Delivered'].includes(o.status));
-      const sorted = [...visible].sort((a,b) => {
-        const rank = s => s === 'Out for delivery' ? 0 : s === 'Accepted' ? 1 : s === 'Order received' ? 2 : s === 'Delivered' ? 3 : 4;
+      // Show only orders assigned to this driver
+      const assigned = state.orders.filter(o => o.deliveryId === driver.id);
+      const sorted = [...assigned].sort((a,b) => {
+        const rank = s => s === 'Out for delivery' ? 0 : s === 'Assigned to delivery' ? 1 : s === 'Delivered' ? 2 : 3;
         return rank(a.status) - rank(b.status);
       });
       return `
-        <div class="delivery-title-row"><h2 style="margin:0">Current Orders</h2><span class="order-count">${sorted.length} orders</span></div>
-        ${sorted.map(deliveryOrderCard).join('') || '<div class="card"><p>No orders available for delivery right now.</p></div>'}
+        <div class="delivery-title-row"><h2 style="margin:0">My Orders</h2><span class="order-count">${sorted.length} orders</span></div>
+        ${sorted.map(o => deliveryOrderCard(o, driver)).join('') || '<div class="delivery-order-card"><p>No orders assigned to you right now.</p></div>'}
         <div class="delivery-legend">
           <strong>Legend:</strong>
           <span class="status-pill dark">In Transit</span>
-          <span class="status-pill pending">Pending</span>
+          <span class="status-pill pending">Assigned</span>
           <span class="status-pill delivered">Delivered</span>
           <span class="tag">Muted card = completed / inactive order</span>
-          <span class="status-pill dark">Primary action</span>
         </div>`;
     }
 
-    function deliveryOrderCard(o) {
+    function deliveryOrderCard(o, driver) {
       const delivered = o.status === 'Delivered';
-      const inTransit = o.status === 'Out for delivery';
-      const statusLabel = delivered ? 'Delivered' : inTransit ? 'In Transit' : 'Pending';
-      const pillClass = delivered ? 'delivered' : inTransit ? 'dark' : 'pending';
+      const isOutForDelivery = o.status === 'Out for delivery';
+      const isAssigned = o.status === 'Assigned to delivery';
+      const driverAccepted = o.deliveryAccepted;
+
+      let statusLabel, pillClass;
+      if (delivered) { statusLabel = 'Delivered'; pillClass = 'delivered'; }
+      else if (isOutForDelivery && driverAccepted) { statusLabel = 'In Transit'; pillClass = 'dark'; }
+      else if (isOutForDelivery) { statusLabel = 'Pending Acceptance'; pillClass = 'pending'; }
+      else { statusLabel = 'Assigned'; pillClass = 'pending'; }
+
+      // Smart buttons — never show all three at once
+      let actionButtons;
+      if (delivered) {
+        actionButtons = `<button class="secondary" onclick="showDeliveryDetails('${o.id}')">View Details</button><span class="tag green">Completed</span>`;
+      } else if (isOutForDelivery && driverAccepted) {
+        // Driver accepted — show only Mark as Delivered
+        actionButtons = `<button class="secondary" onclick="showDeliveryDetails('${o.id}')">View Details</button><button class="delivery-primary-wide" onclick="markDeliveryDelivered('${o.id}')">Mark as Delivered</button>`;
+      } else {
+        // Assigned or Out for delivery but not accepted yet — show Accept + Reject
+        actionButtons = `<button class="secondary" onclick="showDeliveryDetails('${o.id}')">View Details</button><button class="success" onclick="acceptDeliveryOrder('${o.id}')">Accept</button><button class="danger" onclick="rejectDeliveryOrder('${o.id}')">Reject</button>`;
+      }
+
       return `
         <div class="delivery-order-card ${delivered ? 'muted' : ''}">
           <div class="delivery-card-main">
@@ -906,13 +1190,7 @@ function renderDelivery() {
             </div>
             <strong>${money(o.total)}</strong>
           </div>
-          <div class="delivery-actions">
-            <button class="secondary" onclick="showDeliveryDetails('${o.id}')">View Details</button>
-            <button class="secondary ${delivered ? 'disabled' : ''}" onclick="acceptDeliveryOrder('${o.id}')">Accept</button>
-            <button class="secondary ${delivered ? 'disabled' : ''}" onclick="rejectDeliveryOrder('${o.id}')">Reject</button>
-            <button class="delivery-primary-wide ${delivered ? 'disabled' : ''}" onclick="markDeliveryDelivered('${o.id}')">Mark as Delivered</button>
-            ${delivered ? '<span class="tag green">Completed</span>' : ''}
-          </div>
+          <div class="delivery-actions">${actionButtons}</div>
         </div>`;
     }
 
@@ -920,10 +1198,12 @@ function renderDelivery() {
       const o = state.orders.find(x => x.id === id);
       if (!o) return;
       showModal(`<h2>${o.id}</h2>
-        <p><strong>Status:</strong> ${o.status}</p>
-        <p><strong>Customer:</strong> ${o.customer.name}<br><strong>Phone:</strong> ${o.customer.phone}<br><strong>Address:</strong> ${o.customer.address}</p>
-        <p><strong>Items:</strong> ${o.items.map(i => `${i.qty}x ${i.name}`).join(', ')}</p>
-        <p><strong>Payment:</strong> ${o.payment}</p>
+        <div class="mini-line"><strong>Status</strong><span class="status-tag ${statusTagClass(o.status)}">${o.status}</span></div>
+        <div class="mini-line"><strong>Customer</strong><span>${o.customer.name}</span></div>
+        <div class="mini-line"><strong>Phone</strong><span>${o.customer.phone}</span></div>
+        <div class="mini-line"><strong>Address</strong><span>${o.customer.address}</span></div>
+        <div class="mini-line"><strong>Items</strong><span>${o.items.map(i => `${i.qty}x ${i.name}`).join(', ')}</span></div>
+        <div class="mini-line"><strong>Payment</strong><span>${o.payment}</span></div>
         <h3>Total: ${money(o.total)}</h3>
         <button class="secondary" onclick="closeModal()">Close</button>`);
     }
@@ -931,20 +1211,20 @@ function renderDelivery() {
     function acceptDeliveryOrder(id) {
       const o = state.orders.find(x => x.id === id);
       if (!o) return;
-      o.deliveryId = deliveryPersonId;
-      o.status = 'Out for delivery';
-      saveState();
-      renderAll();
+      o.deliveryAccepted = true;
+      // Ensure status is Out for delivery when driver accepts
+      if (o.status === 'Assigned to delivery') o.status = 'Out for delivery';
+      saveState(); renderAll();
     }
 
     function rejectDeliveryOrder(id) {
       const o = state.orders.find(x => x.id === id);
       if (!o) return;
-      if (confirm('Reject this delivery order?')) {
+      if (confirm('Reject this delivery assignment? The order will return to the manager for reassignment.')) {
         o.deliveryId = '';
-        o.status = 'Accepted';
-        saveState();
-        renderAll();
+        o.deliveryAccepted = false;
+        o.status = 'Preparing'; // Return to manager for reassignment
+        saveState(); renderAll();
       }
     }
 
@@ -952,8 +1232,8 @@ function renderDelivery() {
       const o = state.orders.find(x => x.id === id);
       if (!o) return;
       o.status = 'Delivered';
-      saveState();
-      renderAll();
+      o.deliveryAccepted = false;
+      saveState(); renderAll();
     }
 
     function ensureDeliveryShiftData() {
