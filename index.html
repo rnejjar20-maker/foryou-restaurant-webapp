@@ -2270,6 +2270,76 @@
       line-height: 1.35;
     }
 
+    /* Final polish: readable delivery driver selector + game-style order progress */
+    .delivery-top select.input,
+    .delivery-top select,
+    .delivery-top option {
+      color: #1f130d !important;
+      background: #fffaf3 !important;
+      font-weight: 900 !important;
+      opacity: 1 !important;
+    }
+    .delivery-top select.input {
+      border: 1px solid rgba(255,255,255,0.28) !important;
+      box-shadow: 0 10px 22px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.65) !important;
+    }
+
+    .status-steps {
+      gap: 10px;
+    }
+    .step {
+      position: relative;
+      display: grid;
+      gap: 6px;
+      place-items: center;
+      min-height: 58px;
+      font-weight: 900;
+      border-radius: 16px;
+      transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+    .step::before {
+      content: "";
+      width: 20px;
+      height: 20px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      font-size: 13px;
+      font-weight: 900;
+    }
+    .step.done {
+      background: linear-gradient(135deg, #21b86b, #68df9a) !important;
+      color: #063b22 !important;
+      border-color: rgba(33,184,107,0.55) !important;
+      box-shadow: 0 12px 24px rgba(33,184,107,0.22);
+    }
+    .step.done::before {
+      content: "✓";
+      background: rgba(255,255,255,0.82);
+      color: #0a6b3b;
+    }
+    .step.future {
+      background: linear-gradient(135deg, #f3f4f6, #ffffff) !important;
+      color: #777f8d !important;
+      border: 1px solid rgba(119,127,141,0.20) !important;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
+    }
+    .step.future::before {
+      content: "";
+      background: #d9dee6;
+      box-shadow: inset 0 0 0 5px #f6f7f9;
+    }
+    .step.cancelled {
+      background: linear-gradient(135deg, #ef4444, #ff7777) !important;
+      color: #fff !important;
+      border-color: rgba(239,68,68,0.55) !important;
+    }
+    .step.cancelled::before {
+      content: "!";
+      background: rgba(255,255,255,0.82);
+      color: #b91c1c;
+    }
+
   </style>
 </head>
 <body>
@@ -2296,7 +2366,7 @@
   </div>
 
   <script>
-    const STORE_KEY = 'for_you_restaurant_demo_v22_phone_validation';
+    const STORE_KEY = 'for_you_restaurant_demo_v23_delivery_select_progress_steps';
     const MANAGER_PIN = '1234';
     const DELIVERY_PIN = '2222';
 
@@ -9733,7 +9803,12 @@ function renderCart() {
         <div class="card">
           <div class="order-head"><div><h3>Order ${order.id}</h3><p>${order.customer.name} - ${money(order.total)}</p></div><span class="status-tag ${statusTagClass(order.status)}">${order.status}</span></div>
           ${isAcceptedWaiting ? `<div class="notice" style="margin:12px 0">⏱ Your order was accepted. Kitchen starts in ~${minsLeft} min.</div>` : ''}
-          <div class="status-steps">${statusOrder.map(s => `<div class="step ${isCancelled ? 'cancelled' : (statusOrder.indexOf(s) <= statusOrder.indexOf(order.status) ? 'done' : '')}">${s}</div>`).join('')}</div>
+          <div class="status-steps">${statusOrder.map(s => {
+            const currentIndex = statusOrder.indexOf(order.status);
+            const stepIndex = statusOrder.indexOf(s);
+            const stepClass = isCancelled ? 'cancelled' : (stepIndex <= currentIndex ? 'done' : 'future');
+            return `<div class="step ${stepClass}">${s}</div>`;
+          }).join('')}</div>
           <div class="mini-line"><strong>Payment</strong><span>${order.payment}</span></div>
           <div class="mini-line"><strong>Address</strong><span>${order.customer.address}</span></div>
           ${customerLocationLine(order.customer)}
