@@ -2296,7 +2296,7 @@
   </div>
 
   <script>
-    const STORE_KEY = 'for_you_restaurant_demo_v21_delivery_navigation_gps';
+    const STORE_KEY = 'for_you_restaurant_demo_v22_phone_validation';
     const MANAGER_PIN = '1234';
     const DELIVERY_PIN = '2222';
 
@@ -9644,7 +9644,7 @@ function renderCart() {
               <h3>Customer Information</h3>
               <div class="form-grid">
                 <input id="custName" class="input" placeholder="Name" />
-                <input id="custPhone" class="input" placeholder="Phone number" />
+                <input id="custPhone" class="input" placeholder="Phone number: 10 digits" inputmode="numeric" maxlength="10" oninput="this.value=this.value.replace(/\\D/g, '').slice(0,10)" />
                 <input id="custAddress" class="input full" placeholder="Delivery address or use GPS below" />
                 <div class="gps-box full">
                   <button type="button" class="secondary" onclick="useCurrentLocation()">Use my current location</button>
@@ -9688,6 +9688,7 @@ function renderCart() {
       const instructions = byId('custInstructions').value.trim();
       const payment = byId('paymentMethod').value;
       if (!name || !phone || (!address && !checkoutLocation)) return alert('Please fill in name and phone number, then either type an address or use current location.');
+      if (!/^\d{10}$/.test(phone)) return alert('Please enter a valid phone number with exactly 10 digits and no letters or spaces.');
       const id = `FY-${Math.floor(1000 + Math.random() * 9000)}`;
       const order = {
         id, createdAt: new Date().toISOString(), status: 'Order received',
