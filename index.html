@@ -9889,10 +9889,12 @@ function renderCart() {
       const isCancelled = order.status === 'Cancelled' || order.status === 'Rejected';
       const isAcceptedWaiting = order.status === 'Accepted' && order.acceptedAt;
       const minsLeft = isAcceptedWaiting ? Math.max(0, 5 - Math.round((Date.now() - order.acceptedAt) / 60000)) : 0;
+      const canCancel = (order.status === 'Order received' || order.status === 'Accepted') && !isCancelled;
       return `
         <div class="card">
           <div class="order-head"><div><h3>Order ${order.id}</h3><p>${order.customer.name} - ${money(order.total)}</p></div><span class="status-tag ${statusTagClass(order.status)}">${order.status}</span></div>
           ${isAcceptedWaiting ? `<div class="notice" style="margin:12px 0">⏱ Your order was accepted. Kitchen starts in ~${minsLeft} min.</div>` : ''}
+          ${isCancelled ? `<div class="notice" style="margin:12px 0;background:rgba(220,53,69,0.1);border-color:#dc3545;color:#dc3545">This order has been ${order.status.toLowerCase()} and cannot be modified.</div>` : ''}
           <div class="status-steps">${statusOrder.map(s => {
             const currentIndex = statusOrder.indexOf(order.status);
             const stepIndex = statusOrder.indexOf(s);
@@ -9905,7 +9907,22 @@ function renderCart() {
           <div class="mini-line"><strong>Delivery person</strong><span>${order.deliveryId ? getDeliveryName(order.deliveryId) : 'Not assigned yet'}</span></div>
           <div class="mini-line"><strong>Items</strong><span>${order.items.map(i => `${i.qty}x ${i.name}`).join(', ')}</span></div>
           <p>Estimated preparation time is shown as a range because kitchen timing can vary.</p>
+          ${canCancel ? `<div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)"><button class="danger" style="width:100%;padding:12px;font-size:15px;font-weight:600" onclick="cancelCustomerOrder('${order.id}')">🚫 Cancel Order</button><p style="margin:8px 0 0;font-size:13px;color:var(--muted);text-align:center">Cancellation is only available before the kitchen starts preparing your order.</p></div>` : ''}
         </div>`;
+    }
+
+    function cancelCustomerOrder(id) {
+      const o = state.orders.find(x => x.id === id);
+      if (!o) return;
+      if (!['Order received', 'Accepted'].includes(o.status)) {
+        alert('This order can no longer be cancelled. The kitchen has already started preparing it.');
+        return;
+      }
+      if (confirm('Are you sure you want to cancel this order? This action cannot be undone.')) {
+        o.status = 'Cancelled';
+        saveState();
+        renderAll();
+      }
     }
 
     function statusTagClass(s) {
@@ -10030,12 +10047,15 @@ function renderCart() {
         beef: ['beef'],
         fish: ['salmon','saumon','surimi','sushi','maki'],
         avocado: ['avocado','avocat'],
-        spicy: ['spicy','chilli','algerian sauce','korean'],
+        spicy: ['spicy','chilli','algerian sauce','korean','volcano','dragon'],
         pork: ['pork','bacon'],
         sesame: ['sesame','sésame'],
         onion: ['onion','onions','crispy onions','onion rings'],
         coffee: ['coffee','espresso','latte','americano'],
-        dairy: ['cheese','milk','cream','latte','milkshake','mac n cheese','mozzarella','gouda','emmental','blue cheese']
+        dairy: ['cheese','milk','cream','latte','milkshake','mac n cheese','mozzarella','gouda','emmental','blue cheese'],
+        sweet: ['waffle','oreo','cheesecup','parfait','dessert','milkshake','smoothie','pina colada'],
+        filling: ['burger','poke','chirashi','burrito','poutine','wrap','maxi','loaded'],
+        light: ['salad','soda','juice','tea','water','smoothie','mojito']
       };
     }
 
@@ -10133,9 +10153,12 @@ function renderCart() {
         const low = normalizeAssistantText(c);
         return normalized.includes(low) ||
           (low === 'drinks + coffee' && /(drink|coffee|juice|tea|soda|latte|milkshake)/.test(normalized)) ||
-          (low === 'loaded fries' && normalized.includes('fries')) ||
-          (low === 'sandwiches' && /(burger|sandwich|wrap|tacos|burrito)/.test(normalized)) ||
-          (low === 'sushi' && /(sushi|roll|maki|california|maxi|futomaki|burrito|box)/.test(normalized));
+          (low === 'loaded fries' && /(fries|fry|potato)/.test(normalized)) ||
+          (low === 'sandwiches' && /(burger|sandwich|wrap|tacos|burrito|shawarma)/.test(normalized)) ||
+          (low === 'sushi' && /(sushi|roll|maki|california|maxi|futomaki|chirashi|poke|spring roll|saumon|crevette|ebi)/.test(normalized)) ||
+          (low === 'bowls' && /(bowl|chirashi|poke)/.test(normalized)) ||
+          (low === 'desserts' && /(dessert|sweet|sugar|waffle|oreo|parfait)/.test(normalized)) ||
+          (low === 'spring rolls' && /(spring roll|springroll)/.test(normalized));
       });
     }
 
@@ -10228,7 +10251,7 @@ function renderCart() {
         };
       }
 
-      if (budget && /(budget|under|less|cheap|afford|can i get|mad|dh|dhs|dirham)/.test(t)) {
+      if (budget && /(budget|under|less|cheap|afford|can i get|mad|dh|dhs|dirham|inexpensive|economical|low price)/.test(t)) {
         let pool = state.menu;
         const cats = categoryMatches(t);
         if (cats.length) pool = pool.filter(x => cats.includes(x.category));
@@ -10252,7 +10275,7 @@ function renderCart() {
         return { text: `A safe pairing is a drink, side, or dessert.${explainAvoidance(profile)}`, items: topAvailableItems(addOns, analytics, 4, 'pairing', profile, budget) };
       }
 
-      if (/(popular|most ordered|best seller|trending|recommend|dont know|do not know|what should i eat|suggest)/.test(t)) {
+      if (/(popular|most ordered|best seller|trending|recommend|dont know|do not know|what should i eat|suggest|surprise me)/.test(t)) {
         let pool = analytics.topItemsByQty.map(x => x.item);
         const cats = categoryMatches(t);
         if (cats.length) pool = state.menu.filter(x => cats.includes(x.category));
@@ -10290,6 +10313,33 @@ function renderCart() {
           items: topAvailableItems(options, analytics, 4, 'ingredient', profile, budget)
         };
       }
+      // Handle "filling" requests
+      if (/(filling|hearty|big|hungry|substantial|heavy meal)/.test(t)) {
+        const fillingItems = state.menu.filter(x => itemHasPreference(x, 'filling'));
+        return {
+          text: `Looking for something filling? Here are some of our most satisfying options.${explainAvoidance(profile)}`,
+          items: topAvailableItems(fillingItems.length ? fillingItems : state.menu, analytics, 4, 'popular', profile, budget)
+        };
+      }
+
+      // Handle "sweet" or dessert requests
+      if (/(sweet|dessert|sugary|something sweet)/.test(t)) {
+        const sweetItems = state.menu.filter(x => x.category === 'Desserts' || itemHasPreference(x, 'sweet'));
+        return {
+          text: `Here are some sweet options from our menu.${explainAvoidance(profile)}`,
+          items: topAvailableItems(sweetItems.length ? sweetItems : state.menu, analytics, 4, 'popular', profile, budget)
+        };
+      }
+
+      // Handle "cheap/affordable" without explicit number
+      if (/(cheap|affordable|cheapest|least expensive|best value|value for money)/.test(t) && !budget) {
+        const pool = [...state.menu].sort((a,b) => a.price - b.price);
+        return {
+          text: `Here are some of our most affordable options.${explainAvoidance(profile)}`,
+          items: topAvailableItems(pool, analytics, 5, 'budget', profile, null)
+        };
+      }
+
 
       return {
         text: "I can adapt better if you tell me one of these: your budget, what you like, what you do not like, a category, or an ingredient. Example: “I want chicken but no cheese under 70 MAD.”",
@@ -11128,7 +11178,7 @@ function renderDelivery() {
           </div>
           <div class="delivery-actions">
             ${actionButtons}
-            ${o.customer.location ? `<div class="nav-actions">${directionsLinkHtml(o.customer.location, driver.location, driver.location ? 'Navigate from my GPS' : 'Navigate to customer')}${mapsLinkHtml(o.customer.location, 'View customer map')}</div><span class="nav-note">${driver.location ? 'Route uses the saved driver GPS as the starting point.' : 'Save your current location first for a route from your exact position.'}</span>` : '<span class="nav-note">No customer GPS saved for this order.</span>'}
+            ${o.customer.location ? `<div class="nav-actions">${directionsLinkHtml(o.customer.location, driver.location, driver.location ? 'Navigate from my GPS' : 'Navigate to customer')}</div><span class="nav-note">${driver.location ? 'Route uses the saved driver GPS as the starting point.' : 'Save your current location first for a route from your exact position.'}</span>` : '<span class="nav-note">No customer GPS saved for this order.</span>'}
           </div>
         </div>`;
     }
@@ -11244,7 +11294,7 @@ function renderDelivery() {
                   <strong>${new Date().toLocaleString('en',{month:'long',year:'numeric'})}</strong>
                   <span class="tag">Calendar</span>
                 </div>
-                ${calendarHtml(shifts)}
+                ${calendarHtmlClickable(shifts)}
               </div>
 
               <div class="availability-panel" style="margin-top:16px">
@@ -11295,17 +11345,58 @@ function renderDelivery() {
         const isToday = d === now.getDate();
         cells += `<div class="calendar-day ${shiftDays.has(d) ? 'has-shift' : ''} ${isToday ? 'selected' : ''}">${d}</div>`;
       }
-      return `<div class="calendar-grid">${cells}</div><div class="row" style="margin-top:10px"><span class="tag">scheduled shift</span><span class="tag dark">selected date</span></div>`;
+      return `<div class="calendar-grid">${cells}</div><div class="row" style="margin-top:10px"><span class="tag">scheduled shift</span><span class="tag dark">today</span></div>`;
+    }
+
+    function calendarHtmlClickable(shifts) {
+      const now = new Date(), y = now.getFullYear(), m = now.getMonth();
+      const days = new Date(y,m+1,0).getDate();
+      const start = new Date(y,m,1).getDay();
+      const shiftDays = new Set(shifts.map(s => Number(s.date.slice(-2))));
+      let cells = ['M','T','W','T','F','S','S'].map(d => `<div class="calendar-day"><strong>${d}</strong></div>`).join('');
+      const mondayStart = (start + 6) % 7;
+      for (let i=0; i<mondayStart; i++) cells += `<div></div>`;
+      for (let d=1; d<=days; d++) {
+        const isToday = d === now.getDate();
+        const dateStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        cells += `<div class="calendar-day ${shiftDays.has(d) ? 'has-shift' : ''} ${isToday ? 'selected' : ''}" style="cursor:pointer" onclick="openAddShiftModal('${dateStr}')">${d}</div>`;
+      }
+      return `<div class="calendar-grid">${cells}</div><div class="row" style="margin-top:10px"><span class="tag">scheduled shift</span><span class="tag dark">today · click a day to add</span></div>`;
+    }
+
+    function openAddShiftModal(date) {
+      showModal(`
+        <h2 style="margin-bottom:4px">Add Availability</h2>
+        <p style="margin-bottom:16px;color:var(--muted)">${formatShiftDate(date)}</p>
+        <div class="mini-line" style="flex-direction:column;align-items:flex-start;gap:8px">
+          <label style="font-weight:600">Start time</label>
+          <input id="shiftStart" class="input" type="time" value="12:00" style="width:100%" />
+        </div>
+        <div class="mini-line" style="flex-direction:column;align-items:flex-start;gap:8px;margin-top:12px">
+          <label style="font-weight:600">End time</label>
+          <input id="shiftEnd" class="input" type="time" value="16:00" style="width:100%" />
+        </div>
+        <div class="row" style="margin-top:20px;justify-content:flex-end;gap:10px">
+          <button class="ghost" onclick="closeModal()">Cancel</button>
+          <button class="primary" onclick="saveShiftFromModal('${date}')">Save Shift</button>
+        </div>
+      `);
+    }
+
+    function saveShiftFromModal(date) {
+      const start = byId('shiftStart') ? byId('shiftStart').value : '12:00';
+      const end = byId('shiftEnd') ? byId('shiftEnd').value : '16:00';
+      if (!start || !end) { alert('Please enter both start and end times.'); return; }
+      if (start >= end) { alert('End time must be after start time.'); return; }
+      state.deliveryShifts.push({id:'s'+Date.now(),driverId:deliveryPersonId,date,start,end});
+      saveState();
+      closeModal();
+      renderDelivery();
     }
 
     function addDeliveryShift() {
-      const date = prompt('Date for availability? Use format YYYY-MM-DD');
-      if (!date) return;
-      const start = prompt('Start time? Example: 12:00','12:00') || '12:00';
-      const end = prompt('End time? Example: 16:00','16:00') || '16:00';
-      state.deliveryShifts.push({id:'s'+Date.now(),driverId:deliveryPersonId,date,start,end});
-      saveState();
-      renderDelivery();
+      const today = new Date().toISOString().slice(0,10);
+      openAddShiftModal(today);
     }
 
     function deleteDeliveryShift(id) {
